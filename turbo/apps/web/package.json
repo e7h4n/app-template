@@ -1,0 +1,36 @@
+{
+  "name": "web",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbopack --port 3000",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint --max-warnings 0",
+    "check-types": "tsc --noEmit",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^1.0.1",
+    "@repo/ui": "workspace:*",
+    "dotenv": "^17.2.1",
+    "drizzle-orm": "^0.44.5",
+    "next": "^15.5.0",
+    "pg": "^8.16.3",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "^22.15.3",
+    "@types/pg": "^8.15.5",
+    "@types/react": "19.1.0",
+    "@types/react-dom": "19.1.1",
+    "drizzle-kit": "^0.31.4",
+    "eslint": "^9.34.0",
+    "typescript": "5.9.2"
+  }
+}

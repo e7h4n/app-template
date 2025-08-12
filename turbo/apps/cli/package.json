@@ -1,0 +1,37 @@
+{
+  "name": "@repo/cli",
+  "version": "1.1.1",
+  "private": true,
+  "description": "CLI application",
+  "type": "module",
+  "bin": {
+    "app-cli": "./dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "postbuild": "cp package.json dist/ && pnpm json -I -f dist/package.json -e 'delete this.private; delete this.scripts; delete this.devDependencies; delete this.dependencies[\"@repo/core\"]; this.bin[\"app-cli\"]=\"index.js\"; this.files=[\".\"]'",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint . --max-warnings 0",
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@repo/core": "workspace:*",
+    "commander": "^13.0.0",
+    "chalk": "^5.3.0"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "^24.3.0",
+    "eslint": "^9.34.0",
+    "json": "^11.0.0",
+    "tsup": "^8.3.0",
+    "typescript": "5.9.2",
+    "vitest": "^3.2.4"
+  }
+}
