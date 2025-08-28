@@ -3,10 +3,5 @@
     "deploymentEnabled": {
       "main": false
     }
-  },
-  "framework": "nextjs",
-  "installCommand": "cd ../.. && pnpm install --frozen-lockfile",
-  "buildCommand": "cd ../.. && pnpm run build --filter=web",
-  "outputDirectory": ".next",
-  "rootDirectory": "turbo/apps/web"
+  }
 }
