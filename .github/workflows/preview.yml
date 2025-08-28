@@ -80,6 +80,25 @@ jobs:
         env:
           DATABASE_URL: ${{ env.DATABASE_URL }}
 
+      - name: Create GitHub Deployment for Web
+        if: github.event.action != 'closed'
+        id: create_deployment_web
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const deployment = await github.rest.repos.createDeployment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: context.payload.pull_request.head.sha,
+              environment: 'preview-web',
+              description: `Preview deployment for PR #${context.payload.pull_request.number}`,
+              transient_environment: true,
+              auto_merge: false,
+              required_contexts: [],
+              production_environment: false
+            });
+            core.setOutput('deployment_id', deployment.data.id);
+
       - name: Deploy Web to Vercel
         if: github.event.action != 'closed'
         env:
@@ -118,6 +137,45 @@ jobs:
           echo "DEPLOYMENT_URL_WEB=$(cat deployment-url-web.txt)" >> $GITHUB_ENV
           cd ../../..
 
+      - name: Update GitHub Deployment Status for Web
+        if: github.event.action != 'closed' && env.DEPLOYMENT_URL_WEB != ''
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const neonBranch = process.env.NEON_BRANCH_NAME;
+            const description = neonBranch 
+              ? `Web app deployed with Neon branch: ${neonBranch}`
+              : 'Web app deployed successfully';
+            
+            await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: ${{ steps.create_deployment_web.outputs.deployment_id }},
+              state: 'success',
+              environment_url: process.env.DEPLOYMENT_URL_WEB,
+              description: description,
+              auto_inactive: true
+            });
+
+      - name: Create GitHub Deployment for Docs
+        if: github.event.action != 'closed' && vars.VERCEL_PROJECT_ID_DOCS != ''
+        id: create_deployment_docs
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const deployment = await github.rest.repos.createDeployment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: context.payload.pull_request.head.sha,
+              environment: 'preview-docs',
+              description: `Docs preview for PR #${context.payload.pull_request.number}`,
+              transient_environment: true,
+              auto_merge: false,
+              required_contexts: [],
+              production_environment: false
+            });
+            core.setOutput('deployment_id', deployment.data.id);
+
       - name: Deploy Docs to Vercel
         if: github.event.action != 'closed'
         env:
@@ -146,59 +204,41 @@ jobs:
           echo "DOCS_DEPLOYED=true" >> $GITHUB_ENV
           cd ../../..
 
-      - name: Comment PR with Deployment Info
-        if: github.event.action != 'closed' && (env.DEPLOYMENT_URL_WEB != '' || env.DEPLOYMENT_URL_DOCS != '')
+      - name: Update GitHub Deployment Status for Docs
+        if: github.event.action != 'closed' && env.DOCS_DEPLOYED == 'true' && env.DEPLOYMENT_URL_DOCS != ''
         uses: actions/github-script@v7
         with:
           script: |
-            const webUrl = process.env.DEPLOYMENT_URL_WEB;
-            const docsUrl = process.env.DEPLOYMENT_URL_DOCS;
-            const docsDeployed = process.env.DOCS_DEPLOYED === 'true';
-            const branchName = process.env.NEON_BRANCH_NAME || '';
-            
-            let comment = `### 🚀 Preview Deployments Ready!\n\n`;
-            
-            if (webUrl) {
-              comment += `**Web App:** ${webUrl}\n`;
-            }
-            
-            if (docsDeployed && docsUrl) {
-              comment += `**Docs Site:** ${docsUrl}\n`;
-            }
-            
-            if (branchName) {
-              comment += `**Neon Branch:** \`${branchName}\`\n`;
-            } else if (webUrl) {
-              comment += `**Database:** Using default configuration (Neon not configured)\n`;
-            }
-            
-            comment += `\nThese previews will be automatically updated with each commit.`;
-            
-            // Find existing comment
-            const { data: comments } = await github.rest.issues.listComments({
+            await github.rest.repos.createDeploymentStatus({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              issue_number: context.issue.number,
+              deployment_id: ${{ steps.create_deployment_docs.outputs.deployment_id }},
+              state: 'success',
+              environment_url: process.env.DEPLOYMENT_URL_DOCS,
+              description: 'Docs deployed successfully',
+              auto_inactive: true
+            });
+
+      - name: Mark Deployments as Inactive
+        if: github.event.action == 'closed'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Get all deployments for this PR
+            const deployments = await github.rest.repos.listDeployments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: context.payload.pull_request.head.sha
             });
             
-            const botComment = comments.find(comment => 
-              comment.user.type === 'Bot' && 
-              comment.body.includes('Preview Deployments Ready')
-            );
-            
-            if (botComment) {
-              await github.rest.issues.updateComment({
+            // Mark each deployment as inactive
+            for (const deployment of deployments.data) {
+              await github.rest.repos.createDeploymentStatus({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                comment_id: botComment.id,
-                body: comment
-              });
-            } else {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.issue.number,
-                body: comment
+                deployment_id: deployment.id,
+                state: 'inactive',
+                description: 'PR closed - deployment removed'
               });
             }
 
