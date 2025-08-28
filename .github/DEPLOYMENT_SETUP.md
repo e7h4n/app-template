@@ -37,16 +37,18 @@ Configure these in your GitHub repository settings (Settings → Secrets and var
 
 ## Initial Setup
 
-1. Link your project to Vercel (one-time setup):
-   ```bash
-   npx vercel link
-   ```
+1. **Configure Vercel Project Settings**:
+   - Go to your Vercel project settings: https://vercel.com/[your-team]/app-template/settings
+   - Under "General" → "Root Directory", set it to: `turbo/apps/web`
+   - Save the changes
 
 2. Set up your production database in Neon
 
-3. Add all required secrets to GitHub
+3. Add all required secrets and variables to GitHub (see above)
 
 4. The workflow will automatically handle preview deployments for PRs
+
+**Important**: The Vercel project must be configured with the correct root directory (`turbo/apps/web`) for the monorepo structure to work properly.
 
 ## Database Schema Push
 
