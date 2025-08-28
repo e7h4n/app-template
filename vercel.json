@@ -3,5 +3,10 @@
     "deploymentEnabled": {
       "main": false
     }
-  }
+  },
+  "framework": "nextjs",
+  "buildCommand": "cd turbo && pnpm run build --filter=web",
+  "installCommand": "cd turbo && pnpm install",
+  "outputDirectory": "turbo/apps/web/.next",
+  "rootDirectory": "."
 }
