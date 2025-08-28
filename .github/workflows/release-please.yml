@@ -34,9 +34,9 @@ jobs:
       - uses: ./.github/actions/init
 
       - name: Push database schema
-        if: ${{ secrets.POSTGRES_URL != '' }}
+        if: ${{ secrets.DATABASE_URL != '' }}
         env:
-          POSTGRES_URL: ${{ secrets.POSTGRES_URL }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: cd turbo/apps/web && pnpm db:push
 
   publish-npm:
