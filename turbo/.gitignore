@@ -26,6 +26,16 @@ coverage
 out/
 build
 dist
+*.tsbuildinfo
+
+# Fumadocs generated content
+.contentlayer
+.content-collections
+.source
+apps/docs/.source
+
+# Next.js
+apps/*/next-env.d.ts
 
 
 # Debug
