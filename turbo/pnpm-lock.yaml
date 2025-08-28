@@ -124,12 +124,21 @@ importers:
       '@neondatabase/serverless':
         specifier: ^1.0.1
         version: 1.0.1
+      '@repo/core':
+        specifier: workspace:*
+        version: link:../../packages/core
       '@repo/ui':
         specifier: workspace:*
         version: link:../../packages/ui
       '@t3-oss/env-nextjs':
         specifier: ^0.13.8
         version: 0.13.8(typescript@5.9.2)(zod@4.1.4)
+      '@ts-rest/core':
+        specifier: ^3.52.1
+        version: 3.52.1(@types/node@22.15.3)(zod@4.1.4)
+      '@ts-rest/serverless':
+        specifier: ^3.52.1
+        version: 3.52.1(@ts-rest/core@3.52.1(@types/node@22.15.3)(zod@4.1.4))(next@15.5.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(zod@4.1.4)
       dotenv:
         specifier: ^17.2.1
         version: 17.2.1
@@ -181,6 +190,13 @@ importers:
         version: 5.9.2
 
   packages/core:
+    dependencies:
+      '@ts-rest/core':
+        specifier: ^3.52.1
+        version: 3.52.1(@types/node@24.3.0)(zod@4.1.4)
+      zod:
+        specifier: ^4.1.4
+        version: 4.1.4
     devDependencies:
       '@repo/eslint-config':
         specifier: workspace:*
@@ -1518,6 +1534,35 @@ packages:
   '@tailwindcss/postcss@4.1.12':
     resolution: {integrity: sha512-5PpLYhCAwf9SJEeIsSmCDLgyVfdBhdBpzX1OJ87anT9IVR0Z9pjM0FNixCAUAHGnMBGB8K99SwAheXrT0Kh6QQ==}
 
+  '@ts-rest/core@3.52.1':
+    resolution: {integrity: sha512-tAjz7Kxq/grJodcTA1Anop4AVRDlD40fkksEV5Mmal88VoZeRKAG8oMHsDwdwPZz+B/zgnz0q2sF+cm5M7Bc7g==}
+    peerDependencies:
+      '@types/node': ^18.18.7 || >=20.8.4
+      zod: ^3.22.3
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
+      zod:
+        optional: true
+
+  '@ts-rest/serverless@3.52.1':
+    resolution: {integrity: sha512-9lz6SVC/zOjR7Q70Uige1i4fgSLS5cPpei/ocBgdwhc/TJhKWTMQog2IQX3pT2nIA4B4QvZ54YyrBkSiwbrGPw==}
+    peerDependencies:
+      '@azure/functions': ^4.0.0
+      '@ts-rest/core': ~3.52.0
+      '@types/aws-lambda': ^8.10.115
+      next: ^12.0.0 || ^13.0.0 || ^14.0.0
+      zod: ^3.22.3
+    peerDependenciesMeta:
+      '@azure/functions':
+        optional: true
+      '@types/aws-lambda':
+        optional: true
+      next:
+        optional: true
+      zod:
+        optional: true
+
   '@types/chai@5.2.2':
     resolution: {integrity: sha512-8kB30R7Hwqf40JPiKhVzodJs2Qc1ZJ5zuT3uzw5Hq/dhNCl3G3l83jfpdI1e20BP348+fV7VIL/+FxaXkqBmWg==}
 
@@ -2679,6 +2724,9 @@ packages:
   iterator.prototype@1.1.5:
     resolution: {integrity: sha512-H0dkQoCa3b2VEeKQBOxFph+JAbcrQdE7KC0UkqwpLmv2EC4P41QXP+rqo9wYodACiG5/WM5s9oDApTU8utwj9g==}
     engines: {node: '>= 0.4'}
+
+  itty-router@5.0.22:
+    resolution: {integrity: sha512-9hmdGErWdYDOurGYxSbqLhy4EFReIwk71hMZTJ5b+zfa2zjMNV1ftFno2b8VjAQvX615gNB8Qxbl9JMRqHnIVA==}
 
   jackspeak@3.4.3:
     resolution: {integrity: sha512-OGlZQpz2yfahA/Rd1Y8Cd9SIEsqvXkLVoSw/cgwhnhFMDbsQFeZYoJJ7bIZBS9BcamUW96asq/npPWugM+RQBw==}
@@ -5017,6 +5065,24 @@ snapshots:
       postcss: 8.5.6
       tailwindcss: 4.1.12
 
+  '@ts-rest/core@3.52.1(@types/node@22.15.3)(zod@4.1.4)':
+    optionalDependencies:
+      '@types/node': 22.15.3
+      zod: 4.1.4
+
+  '@ts-rest/core@3.52.1(@types/node@24.3.0)(zod@4.1.4)':
+    optionalDependencies:
+      '@types/node': 24.3.0
+      zod: 4.1.4
+
+  '@ts-rest/serverless@3.52.1(@ts-rest/core@3.52.1(@types/node@22.15.3)(zod@4.1.4))(next@15.5.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(zod@4.1.4)':
+    dependencies:
+      '@ts-rest/core': 3.52.1(@types/node@22.15.3)(zod@4.1.4)
+      itty-router: 5.0.22
+    optionalDependencies:
+      next: 15.5.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      zod: 4.1.4
+
   '@types/chai@5.2.2':
     dependencies:
       '@types/deep-eql': 4.0.2
@@ -6401,6 +6467,8 @@ snapshots:
       get-proto: 1.0.1
       has-symbols: 1.1.0
       set-function-name: 2.0.2
+
+  itty-router@5.0.22: {}
 
   jackspeak@3.4.3:
     dependencies:
