@@ -80,19 +80,22 @@ jobs:
         env:
           POSTGRES_URL: ${{ env.DATABASE_URL }}
 
-      - name: Deploy to Vercel
+      - name: Deploy Web to Vercel
         if: github.event.action != 'closed'
         env:
           VERCEL_ORG_ID: ${{ vars.VERCEL_TEAM_ID }}
-          VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
+          VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID_WEB }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           DATABASE_URL: ${{ env.DATABASE_URL }}
         run: |
           # Check if Vercel is configured
           if [ -z "$VERCEL_TOKEN" ] || [ -z "$VERCEL_ORG_ID" ] || [ -z "$VERCEL_PROJECT_ID" ]; then
-            echo "Vercel is not configured. Please add VERCEL_TOKEN, VERCEL_ORG_ID, and VERCEL_PROJECT_ID secrets."
+            echo "Vercel is not configured. Please add VERCEL_TOKEN, VERCEL_ORG_ID, and VERCEL_PROJECT_ID_WEB secrets."
             exit 1
           fi
+          
+          # Deploy web app
+          cd turbo/apps/web
           
           # Initialize Vercel project with correct configuration
           mkdir -p .vercel
@@ -105,36 +108,77 @@ jobs:
               --env DATABASE_URL=$DATABASE_URL \
               --meta branch=${{ github.head_ref }} \
               --meta pr=${{ github.event.pull_request.number }} \
-              > deployment-url.txt
+              > deployment-url-web.txt
           else
             echo "Warning: Deploying without DATABASE_URL (Neon not configured)"
             vercel deploy \
               --token=$VERCEL_TOKEN \
               --meta branch=${{ github.head_ref }} \
               --meta pr=${{ github.event.pull_request.number }} \
-              > deployment-url.txt
+              > deployment-url-web.txt
           fi
           
-          echo "DEPLOYMENT_URL=$(cat deployment-url.txt)" >> $GITHUB_ENV
+          echo "DEPLOYMENT_URL_WEB=$(cat deployment-url-web.txt)" >> $GITHUB_ENV
+          cd ../../..
+
+      - name: Deploy Docs to Vercel
+        if: github.event.action != 'closed'
+        env:
+          VERCEL_ORG_ID: ${{ vars.VERCEL_TEAM_ID }}
+          VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID_DOCS }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          # Check if Vercel is configured for docs
+          if [ -z "$VERCEL_TOKEN" ] || [ -z "$VERCEL_ORG_ID" ] || [ -z "$VERCEL_PROJECT_ID" ]; then
+            echo "Vercel docs is not configured. Skipping docs deployment."
+            echo "DOCS_DEPLOYED=false" >> $GITHUB_ENV
+            exit 0
+          fi
+          
+          # Deploy docs site
+          cd turbo/apps/docs
+          
+          # Initialize Vercel project with correct configuration
+          mkdir -p .vercel
+          echo '{"orgId":"'$VERCEL_ORG_ID'","projectId":"'$VERCEL_PROJECT_ID'"}' > .vercel/project.json
+          
+          vercel deploy \
+            --token=$VERCEL_TOKEN \
+            --meta branch=${{ github.head_ref }} \
+            --meta pr=${{ github.event.pull_request.number }} \
+            > deployment-url-docs.txt
+          
+          echo "DEPLOYMENT_URL_DOCS=$(cat deployment-url-docs.txt)" >> $GITHUB_ENV
+          echo "DOCS_DEPLOYED=true" >> $GITHUB_ENV
+          cd ../../..
 
       - name: Comment PR with Deployment Info
-        if: github.event.action != 'closed' && env.DEPLOYMENT_URL != ''
+        if: github.event.action != 'closed' && (env.DEPLOYMENT_URL_WEB != '' || env.DEPLOYMENT_URL_DOCS != '')
         uses: actions/github-script@v7
         with:
           script: |
-            const deploymentUrl = process.env.DEPLOYMENT_URL;
+            const webUrl = process.env.DEPLOYMENT_URL_WEB;
+            const docsUrl = process.env.DEPLOYMENT_URL_DOCS;
+            const docsDeployed = process.env.DOCS_DEPLOYED === 'true';
             const branchName = process.env.NEON_BRANCH_NAME || '';
             
-            let comment = `### 🚀 Preview Deployment Ready!\n\n`;
-            comment += `**Vercel Preview:** ${deploymentUrl}\n`;
+            let comment = `### 🚀 Preview Deployments Ready!\n\n`;
+            
+            if (webUrl) {
+              comment += `**Web App:** ${webUrl}\n`;
+            }
+            
+            if (docsDeployed && docsUrl) {
+              comment += `**Docs Site:** ${docsUrl}\n`;
+            }
             
             if (branchName) {
               comment += `**Neon Branch:** \`${branchName}\`\n`;
-            } else {
+            } else if (webUrl) {
               comment += `**Database:** Using default configuration (Neon not configured)\n`;
             }
             
-            comment += `\nThis preview will be automatically updated with each commit.`;
+            comment += `\nThese previews will be automatically updated with each commit.`;
             
             // Find existing comment
             const { data: comments } = await github.rest.issues.listComments({
@@ -145,7 +189,7 @@ jobs:
             
             const botComment = comments.find(comment => 
               comment.user.type === 'Bot' && 
-              comment.body.includes('Preview Deployment Ready')
+              comment.body.includes('Preview Deployments Ready')
             );
             
             if (botComment) {
@@ -180,7 +224,7 @@ jobs:
             echo "Branch $BRANCH_NAME does not exist, skipping deletion"
           fi
 
-  production:
+  production-web:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     
@@ -202,12 +246,53 @@ jobs:
       - name: Install Vercel CLI
         run: npm install -g vercel@latest
       
-      - name: Deploy to Production
+      - name: Deploy Web to Production
         env:
           VERCEL_ORG_ID: ${{ vars.VERCEL_TEAM_ID }}
-          VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
+          VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID_WEB }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
+          cd turbo/apps/web
+          # Initialize Vercel project with correct configuration
+          mkdir -p .vercel
+          echo '{"orgId":"'$VERCEL_ORG_ID'","projectId":"'$VERCEL_PROJECT_ID'"}' > .vercel/project.json
+          vercel deploy --prod --token=$VERCEL_TOKEN
+
+  production-docs:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          cache-dependency-path: turbo/pnpm-lock.yaml
+      
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+      
+      - name: Deploy Docs to Production
+        env:
+          VERCEL_ORG_ID: ${{ vars.VERCEL_TEAM_ID }}
+          VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID_DOCS }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          # Check if docs deployment is configured
+          if [ -z "$VERCEL_PROJECT_ID" ]; then
+            echo "Docs deployment not configured. Skipping."
+            exit 0
+          fi
+          
+          cd turbo/apps/docs
           # Initialize Vercel project with correct configuration
           mkdir -p .vercel
           echo '{"orgId":"'$VERCEL_ORG_ID'","projectId":"'$VERCEL_PROJECT_ID'"}' > .vercel/project.json

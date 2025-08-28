@@ -4,15 +4,22 @@
     "plugins": [
       {
         "name": "next"
+      },
+      {
+        "name": "fumadocs-typescript"
       }
-    ]
+    ],
+    "paths": {
+      "@/*": ["./*"]
+    }
   },
   "include": [
     "**/*.ts",
     "**/*.tsx",
     "next-env.d.ts",
     "next.config.js",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    ".source"
   ],
   "exclude": ["node_modules"]
 }
