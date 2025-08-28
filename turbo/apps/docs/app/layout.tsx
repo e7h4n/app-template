@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
-import { RootProvider } from 'fumadocs-ui/provider';
+import { RootProvider } from "fumadocs-ui/provider";
 import "./globals.css";
 
 const geistSans = localFont({
@@ -25,9 +25,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <RootProvider>
-          {children}
-        </RootProvider>
+        <RootProvider>{children}</RootProvider>
       </body>
     </html>
   );
