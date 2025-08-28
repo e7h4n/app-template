@@ -32,8 +32,22 @@ jobs:
       - name: Install Neon CLI
         run: npm install -g neonctl@latest
 
-      - name: Create or Update Neon Branch
+      - name: Check Neon Configuration
         if: github.event.action != 'closed'
+        id: neon_check
+        env:
+          NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+          NEON_PROJECT_ID: ${{ secrets.NEON_PROJECT_ID }}
+        run: |
+          if [ -z "$NEON_API_KEY" ] || [ -z "$NEON_PROJECT_ID" ]; then
+            echo "Neon is not configured. Skipping database branch creation."
+            echo "neon_configured=false" >> $GITHUB_OUTPUT
+          else
+            echo "neon_configured=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create or Update Neon Branch
+        if: github.event.action != 'closed' && steps.neon_check.outputs.neon_configured == 'true'
         env:
           NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
           NEON_PROJECT_ID: ${{ secrets.NEON_PROJECT_ID }}
@@ -57,7 +71,7 @@ jobs:
           echo "NEON_BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
 
       - name: Run Database Migrations
-        if: github.event.action != 'closed'
+        if: github.event.action != 'closed' && steps.neon_check.outputs.neon_configured == 'true'
         working-directory: ./turbo
         run: |
           pnpm install
@@ -75,33 +89,52 @@ jobs:
           DATABASE_URL: ${{ env.DATABASE_URL }}
         working-directory: ./turbo
         run: |
+          # Check if Vercel is configured
+          if [ -z "$VERCEL_TOKEN" ] || [ -z "$VERCEL_ORG_ID" ] || [ -z "$VERCEL_PROJECT_ID" ]; then
+            echo "Vercel is not configured. Please add VERCEL_TOKEN, VERCEL_ORG_ID, and VERCEL_PROJECT_ID secrets."
+            exit 1
+          fi
+          
           # Pull Vercel environment information
           vercel pull --yes --environment=preview --token=$VERCEL_TOKEN
           
-          # Build and deploy
-          vercel deploy \
-            --token=$VERCEL_TOKEN \
-            --env DATABASE_URL=$DATABASE_URL \
-            --meta branch=${{ github.head_ref }} \
-            --meta pr=${{ github.event.pull_request.number }} \
-            > deployment-url.txt
+          # Build and deploy with or without DATABASE_URL
+          if [ -n "$DATABASE_URL" ]; then
+            vercel deploy \
+              --token=$VERCEL_TOKEN \
+              --env DATABASE_URL=$DATABASE_URL \
+              --meta branch=${{ github.head_ref }} \
+              --meta pr=${{ github.event.pull_request.number }} \
+              > deployment-url.txt
+          else
+            echo "Warning: Deploying without DATABASE_URL (Neon not configured)"
+            vercel deploy \
+              --token=$VERCEL_TOKEN \
+              --meta branch=${{ github.head_ref }} \
+              --meta pr=${{ github.event.pull_request.number }} \
+              > deployment-url.txt
+          fi
           
           echo "DEPLOYMENT_URL=$(cat deployment-url.txt)" >> $GITHUB_ENV
 
       - name: Comment PR with Deployment Info
-        if: github.event.action != 'closed'
+        if: github.event.action != 'closed' && env.DEPLOYMENT_URL != ''
         uses: actions/github-script@v7
         with:
           script: |
             const deploymentUrl = process.env.DEPLOYMENT_URL;
-            const branchName = process.env.NEON_BRANCH_NAME;
+            const branchName = process.env.NEON_BRANCH_NAME || '';
             
-            const comment = `### 🚀 Preview Deployment Ready!
+            let comment = `### 🚀 Preview Deployment Ready!\n\n`;
+            comment += `**Vercel Preview:** ${deploymentUrl}\n`;
             
-            **Vercel Preview:** ${deploymentUrl}
-            **Neon Branch:** \`${branchName}\`
+            if (branchName) {
+              comment += `**Neon Branch:** \`${branchName}\`\n`;
+            } else {
+              comment += `**Database:** Using default configuration (Neon not configured)\n`;
+            }
             
-            This preview will be automatically updated with each commit.`;
+            comment += `\nThis preview will be automatically updated with each commit.`;
             
             // Find existing comment
             const { data: comments } = await github.rest.issues.listComments({
