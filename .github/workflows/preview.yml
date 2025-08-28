@@ -95,10 +95,9 @@ jobs:
             exit 1
           fi
           
-          # Initialize Vercel project
+          # Initialize Vercel project with correct configuration
           mkdir -p .vercel
           echo '{"orgId":"'$VERCEL_ORG_ID'","projectId":"'$VERCEL_PROJECT_ID'"}' > .vercel/project.json
-          vercel pull --yes --environment=preview --token=$VERCEL_TOKEN || true
           
           # Build and deploy with or without DATABASE_URL
           if [ -n "$DATABASE_URL" ]; then
@@ -211,8 +210,7 @@ jobs:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         working-directory: ./turbo/apps/web
         run: |
-          # Initialize Vercel project
+          # Initialize Vercel project with correct configuration
           mkdir -p .vercel
           echo '{"orgId":"'$VERCEL_ORG_ID'","projectId":"'$VERCEL_PROJECT_ID'"}' > .vercel/project.json
-          vercel pull --yes --environment=production --token=$VERCEL_TOKEN || true
           vercel deploy --prod --token=$VERCEL_TOKEN
