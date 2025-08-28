@@ -5,8 +5,8 @@
     }
   },
   "framework": "nextjs",
-  "buildCommand": "cd turbo && pnpm run build --filter=web",
-  "installCommand": "cd turbo && pnpm install",
-  "outputDirectory": "turbo/apps/web/.next",
-  "rootDirectory": "."
+  "installCommand": "cd ../.. && pnpm install",
+  "buildCommand": "cd ../.. && pnpm run build --filter=web",
+  "outputDirectory": ".next",
+  "rootDirectory": "turbo/apps/web"
 }
