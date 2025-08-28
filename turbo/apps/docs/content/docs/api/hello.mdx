@@ -33,7 +33,7 @@ Generate a personalized greeting with full metadata.
   "metadata": {
     "requestId": "550e8400-e29b-41d4-a716-446655440000",
     "version": "1.0.0",
-    "serverTime": "10:30:00 AM"  // Only if includeTime is true
+    "serverTime": "10:30:00 AM" // Only if includeTime is true
   }
 }
 ```
@@ -81,12 +81,12 @@ curl http://localhost:3000/api/hello/Maria?lang=es
 
 ## Supported Languages
 
-| Code | Language | Greeting |
-|------|----------|----------|
-| en   | English  | Hello    |
-| zh   | Chinese  | 你好      |
+| Code | Language | Greeting   |
+| ---- | -------- | ---------- |
+| en   | English  | Hello      |
+| zh   | Chinese  | 你好       |
 | ja   | Japanese | こんにちは |
-| es   | Spanish  | Hola     |
+| es   | Spanish  | Hola       |
 
 ## Error Responses
 
@@ -119,14 +119,14 @@ Returned when validation fails or required parameters are missing.
 The API contracts are defined in `@repo/core`:
 
 ```typescript
-import { HelloRequest, HelloResponse } from '@repo/core';
+import { HelloRequest, HelloResponse } from "@repo/core";
 
 // HelloRequest type
 type HelloRequest = {
   name: string;
   language?: "en" | "zh" | "ja" | "es";
   includeTime?: boolean;
-}
+};
 
 // HelloResponse type
 type HelloResponse = {
@@ -138,7 +138,7 @@ type HelloResponse = {
     version: string;
     serverTime?: string;
   };
-}
+};
 ```
 
 ## Testing the API
@@ -147,18 +147,18 @@ You can test the API using the following examples:
 
 ```typescript
 // Using fetch in TypeScript
-import { HelloRequest, HelloResponse } from '@repo/core';
+import { HelloRequest, HelloResponse } from "@repo/core";
 
 const request: HelloRequest = {
   name: "Test User",
   language: "ja",
-  includeTime: true
+  includeTime: true,
 };
 
-const response = await fetch('/api/hello', {
-  method: 'POST',
+const response = await fetch("/api/hello", {
+  method: "POST",
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
   body: JSON.stringify(request),
 });

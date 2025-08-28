@@ -1,1 +1,1 @@
-export * from './hello.contract';
+export * from "./hello.contract";
