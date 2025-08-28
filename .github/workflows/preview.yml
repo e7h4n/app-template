@@ -87,7 +87,7 @@ jobs:
           VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           DATABASE_URL: ${{ env.DATABASE_URL }}
-        working-directory: ./turbo
+        working-directory: ./turbo/apps/web
         run: |
           # Check if Vercel is configured
           if [ -z "$VERCEL_TOKEN" ] || [ -z "$VERCEL_ORG_ID" ] || [ -z "$VERCEL_PROJECT_ID" ]; then
@@ -106,7 +106,6 @@ jobs:
               --env DATABASE_URL=$DATABASE_URL \
               --meta branch=${{ github.head_ref }} \
               --meta pr=${{ github.event.pull_request.number }} \
-              --cwd apps/web \
               > deployment-url.txt
           else
             echo "Warning: Deploying without DATABASE_URL (Neon not configured)"
@@ -114,7 +113,6 @@ jobs:
               --token=$VERCEL_TOKEN \
               --meta branch=${{ github.head_ref }} \
               --meta pr=${{ github.event.pull_request.number }} \
-              --cwd apps/web \
               > deployment-url.txt
           fi
           
@@ -210,8 +208,8 @@ jobs:
           VERCEL_ORG_ID: ${{ vars.VERCEL_TEAM_ID }}
           VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        working-directory: ./turbo
+        working-directory: ./turbo/apps/web
         run: |
           vercel link --yes --token=$VERCEL_TOKEN --project=$VERCEL_PROJECT_ID --scope=$VERCEL_ORG_ID
           vercel pull --yes --environment=production --token=$VERCEL_TOKEN
-          vercel deploy --prod --token=$VERCEL_TOKEN --cwd apps/web
+          vercel deploy --prod --token=$VERCEL_TOKEN
