@@ -1,18 +1,15 @@
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import { schema } from "./db";
+import { env } from "../env";
 
-const connectionString = process.env.POSTGRES_URL;
+const connectionString = env.POSTGRES_URL;
 
 let db: ReturnType<typeof drizzle<typeof schema>> | null = null;
 let pool: Pool | null = null;
 
 export function getDb() {
   if (!db) {
-    if (!connectionString) {
-      throw new Error("POSTGRES_URL environment variable is not set");
-    }
-
     pool = new Pool({ connectionString });
     db = drizzle(pool, { schema });
   }
