@@ -56,10 +56,10 @@ jobs:
           
           # Check if branch exists
           if neonctl branches list --project-id $NEON_PROJECT_ID --output json | jq -e ".[] | select(.name == \"$BRANCH_NAME\")" > /dev/null 2>&1; then
-            echo "Branch $BRANCH_NAME already exists"
-            # Reset branch to parent state
-            PARENT_BRANCH=$(neonctl branches list --project-id $NEON_PROJECT_ID --output json | jq -r ".[] | select(.name == \"$BRANCH_NAME\") | .parent_id")
-            neonctl branches reset $BRANCH_NAME --parent $PARENT_BRANCH --project-id $NEON_PROJECT_ID
+            echo "Branch $BRANCH_NAME already exists, deleting and recreating"
+            # Delete and recreate is simpler than reset
+            neonctl branches delete $BRANCH_NAME --project-id $NEON_PROJECT_ID || true
+            neonctl branches create --name $BRANCH_NAME --project-id $NEON_PROJECT_ID
           else
             echo "Creating new branch $BRANCH_NAME"
             neonctl branches create --name $BRANCH_NAME --project-id $NEON_PROJECT_ID
