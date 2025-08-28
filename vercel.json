@@ -5,8 +5,8 @@
     }
   },
   "framework": "nextjs",
-  "buildCommand": "pnpm run build --filter=web",
-  "installCommand": "pnpm install",
-  "outputDirectory": "apps/web/.next",
-  "rootDirectory": "turbo"
+  "installCommand": "cd ../.. && pnpm install --frozen-lockfile",
+  "buildCommand": "cd ../.. && pnpm run build --filter=web",
+  "outputDirectory": ".next",
+  "rootDirectory": "turbo/apps/web"
 }
