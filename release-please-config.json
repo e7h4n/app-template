@@ -8,6 +8,9 @@
         },
         "turbo/apps/web": {
             "releaseType": "node"
+        },
+        "turbo/apps/docs": {
+            "releaseType": "node"
         }
     },
     "plugins": [
