@@ -40,9 +40,6 @@ turbo/
 
 ## Environment Configuration
 
-Configure the following in GitHub Actions secrets and variables at:
-`https://github.com/e7h4n/app-template/settings/secrets/actions`
-
 ### Secrets
 - `NEON_API_KEY`: Database API key
 - `NPM_TOKEN`: NPM authentication token
@@ -52,23 +49,3 @@ Configure the following in GitHub Actions secrets and variables at:
 - `NEON_PROJECT_ID`: Neon database project identifier
 - `VERCEL_PROJECT_ID`: Vercel project identifier
 - `VERCEL_TEAM_ID`: Vercel team identifier
-
-## Getting Started
-
-```bash
-# Install dependencies
-pnpm install
-
-# Run development
-pnpm dev
-
-# Run tests
-pnpm test
-
-# Build all packages
-pnpm build
-```
-
-## Development Guidelines
-
-This project follows YAGNI (You Aren't Gonna Need It) and avoids defensive programming. See [CLAUDE.md](./CLAUDE.md) for detailed development principles.
