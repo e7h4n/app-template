@@ -1,0 +1,164 @@
+name: Preview Deployment
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      deployments: write
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+      
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+      
+      - name: Install Neon CLI
+        run: npm install -g neonctl@latest
+
+      - name: Create or Update Neon Branch
+        if: github.event.action != 'closed'
+        env:
+          NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+          NEON_PROJECT_ID: ${{ secrets.NEON_PROJECT_ID }}
+        run: |
+          BRANCH_NAME="preview-pr-${{ github.event.pull_request.number }}"
+          
+          # Check if branch exists
+          if neonctl branches list --project-id $NEON_PROJECT_ID --output json | jq -e ".[] | select(.name == \"$BRANCH_NAME\")" > /dev/null 2>&1; then
+            echo "Branch $BRANCH_NAME already exists"
+            # Reset branch to parent state
+            PARENT_BRANCH=$(neonctl branches list --project-id $NEON_PROJECT_ID --output json | jq -r ".[] | select(.name == \"$BRANCH_NAME\") | .parent_id")
+            neonctl branches reset $BRANCH_NAME --parent $PARENT_BRANCH --project-id $NEON_PROJECT_ID
+          else
+            echo "Creating new branch $BRANCH_NAME"
+            neonctl branches create --name $BRANCH_NAME --project-id $NEON_PROJECT_ID
+          fi
+          
+          # Get connection string
+          DATABASE_URL=$(neonctl connection-string $BRANCH_NAME --project-id $NEON_PROJECT_ID --database-name neondb --pooled)
+          echo "DATABASE_URL=$DATABASE_URL" >> $GITHUB_ENV
+          echo "NEON_BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+
+      - name: Run Database Migrations
+        if: github.event.action != 'closed'
+        working-directory: ./turbo
+        run: |
+          pnpm install
+          cd apps/web
+          pnpm db:migrate
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+
+      - name: Deploy to Vercel
+        if: github.event.action != 'closed'
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+        run: |
+          # Pull Vercel environment information
+          vercel pull --yes --environment=preview --token=$VERCEL_TOKEN
+          
+          # Build and deploy
+          vercel deploy \
+            --prebuilt \
+            --token=$VERCEL_TOKEN \
+            --env DATABASE_URL=$DATABASE_URL \
+            --meta branch=${{ github.head_ref }} \
+            --meta pr=${{ github.event.pull_request.number }} \
+            > deployment-url.txt
+          
+          echo "DEPLOYMENT_URL=$(cat deployment-url.txt)" >> $GITHUB_ENV
+
+      - name: Comment PR with Deployment Info
+        if: github.event.action != 'closed'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const deploymentUrl = process.env.DEPLOYMENT_URL;
+            const branchName = process.env.NEON_BRANCH_NAME;
+            
+            const comment = `### 🚀 Preview Deployment Ready!
+            
+            **Vercel Preview:** ${deploymentUrl}
+            **Neon Branch:** \`${branchName}\`
+            
+            This preview will be automatically updated with each commit.`;
+            
+            // Find existing comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            
+            const botComment = comments.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('Preview Deployment Ready')
+            );
+            
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: comment
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: comment
+              });
+            }
+
+      - name: Delete Neon Branch
+        if: github.event.action == 'closed'
+        env:
+          NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+          NEON_PROJECT_ID: ${{ secrets.NEON_PROJECT_ID }}
+        run: |
+          BRANCH_NAME="preview-pr-${{ github.event.pull_request.number }}"
+          
+          # Check if branch exists before trying to delete
+          if neonctl branches list --project-id $NEON_PROJECT_ID --output json | jq -e ".[] | select(.name == \"$BRANCH_NAME\")" > /dev/null 2>&1; then
+            echo "Deleting branch $BRANCH_NAME"
+            neonctl branches delete $BRANCH_NAME --project-id $NEON_PROJECT_ID
+          else
+            echo "Branch $BRANCH_NAME does not exist, skipping deletion"
+          fi
+
+  production:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Deploy to Production
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          npm install -g vercel@latest
+          vercel pull --yes --environment=production --token=$VERCEL_TOKEN
+          vercel deploy --prod --token=$VERCEL_TOKEN
