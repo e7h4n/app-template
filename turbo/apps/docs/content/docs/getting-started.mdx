@@ -1,0 +1,58 @@
+---
+title: Installation
+description: How to install and set up the project
+---
+
+# Installation Guide
+
+Learn how to install and configure the project.
+
+## Prerequisites
+
+- Node.js 20 or later
+- pnpm package manager
+
+## Installation Steps
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/your-repo/project.git
+cd project
+```
+
+### 2. Install Dependencies
+
+```bash
+pnpm install
+```
+
+### 3. Run Development Server
+
+```bash
+pnpm dev
+```
+
+Your application will be available at:
+- Web app: http://localhost:3000
+- Documentation: http://localhost:3001
+
+## Project Structure
+
+```
+turbo/
+├── apps/
+│   ├── web/         # Main web application
+│   ├── docs/        # Documentation site
+│   └── cli/         # CLI tool
+├── packages/        # Shared packages
+└── turbo.json      # Turborepo configuration
+```
+
+## Configuration
+
+The project uses Turborepo for monorepo management. Each app and package has its own configuration files.
+
+### Environment Variables
+
+Create a `.env.local` file in each app directory with the required environment variables.
