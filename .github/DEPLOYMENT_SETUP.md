@@ -48,11 +48,11 @@ Configure these in your GitHub repository settings (Settings → Secrets and var
 
 4. The workflow will automatically handle preview deployments for PRs
 
-## Database Migrations
+## Database Schema Push
 
-The workflow automatically runs migrations on preview branches using:
+The workflow automatically pushes database schema to preview branches using:
 ```bash
-pnpm db:migrate
+pnpm db:push
 ```
 
-Make sure your migration scripts are configured in `turbo/apps/web/package.json`.
+This uses Drizzle Kit to push your schema defined in `turbo/apps/web/src/db/schema/` to the Neon database branch.
