@@ -3,7 +3,7 @@ import { Pool } from "pg";
 import { schema } from "./db";
 import { env } from "../env";
 
-const connectionString = env.POSTGRES_URL;
+const connectionString = env.DATABASE_URL;
 
 let db: ReturnType<typeof drizzle<typeof schema>> | null = null;
 let pool: Pool | null = null;
