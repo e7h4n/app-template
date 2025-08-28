@@ -87,7 +87,6 @@ jobs:
           VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           DATABASE_URL: ${{ env.DATABASE_URL }}
-        working-directory: ./turbo/apps/web
         run: |
           # Check if Vercel is configured
           if [ -z "$VERCEL_TOKEN" ] || [ -z "$VERCEL_ORG_ID" ] || [ -z "$VERCEL_PROJECT_ID" ]; then
@@ -208,7 +207,6 @@ jobs:
           VERCEL_ORG_ID: ${{ vars.VERCEL_TEAM_ID }}
           VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        working-directory: ./turbo/apps/web
         run: |
           # Initialize Vercel project with correct configuration
           mkdir -p .vercel
