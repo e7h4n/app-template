@@ -2,6 +2,8 @@
 
 This repository is configured to automatically create preview deployments for pull requests using Vercel and Neon database branches.
 
+⚠️ **Important**: The preview deployment workflow will fail until the required secrets are configured. This is expected behavior.
+
 ## How It Works
 
 1. **Automatic Deployments Disabled**: Vercel's automatic Git deployments are disabled via `vercel.json`
@@ -15,9 +17,9 @@ This repository is configured to automatically create preview deployments for pu
 
 ## Required GitHub Secrets
 
-Configure these secrets in your GitHub repository settings:
+Configure these secrets in your GitHub repository settings (Settings → Secrets and variables → Actions):
 
-### Vercel
+### Vercel (Required)
 - `VERCEL_TOKEN`: Your Vercel personal access token
   - Generate at: https://vercel.com/account/tokens
 - `VERCEL_ORG_ID`: Your Vercel organization ID
@@ -25,11 +27,13 @@ Configure these secrets in your GitHub repository settings:
 - `VERCEL_PROJECT_ID`: Your Vercel project ID
   - Find in Vercel project settings → General → Project ID section
 
-### Neon
+### Neon (Optional but Recommended)
 - `NEON_API_KEY`: Your Neon API key
   - Generate at: https://console.neon.tech/app/settings/api-keys
 - `NEON_PROJECT_ID`: Your Neon project ID
   - Find in Neon console → Project Settings → General
+
+**Note**: If Neon secrets are not configured, the deployment will still work but without database branching.
 
 ## Initial Setup
 
