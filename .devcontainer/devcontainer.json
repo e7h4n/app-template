@@ -18,7 +18,7 @@
     "source=cache,target=/home/vscode/.cache",
     "source=vercel,target=/home/vscode/.local/share/com.vercel.cli"
   ],
-  "postCreateCommand": "sudo mkdir -p /home/vscode/.local/bin && sudo chown -R vscode:vscode /home/vscode/.config /home/vscode/.cache /home/vscode/.local",
+  "postCreateCommand": "sudo mkdir -p /home/vscode/.local/bin && sudo chown -R vscode:vscode /home/vscode/.config /home/vscode/.cache /home/vscode/.local && pnpm i -g vercel",
   "customizations": {
     "vscode": {
       "settings": {
