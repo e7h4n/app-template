@@ -94,9 +94,6 @@ jobs:
             exit 1
           fi
           
-          # Deploy web app
-          cd turbo/apps/web
-          
           # Initialize Vercel project with correct configuration
           mkdir -p .vercel
           echo '{"orgId":"'$VERCEL_ORG_ID'","projectId":"'$VERCEL_PROJECT_ID'"}' > .vercel/project.json
@@ -134,9 +131,6 @@ jobs:
             echo "DOCS_DEPLOYED=false" >> $GITHUB_ENV
             exit 0
           fi
-          
-          # Deploy docs site
-          cd turbo/apps/docs
           
           # Initialize Vercel project with correct configuration
           mkdir -p .vercel
