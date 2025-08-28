@@ -31,3 +31,33 @@
 - File operations should naturally throw if permissions are wrong
 - Don't wrap every async operation in try/catch
 - Only use try/catch when you have specific error recovery logic
+
+### Strict Type Checking
+**Maintain type safety throughout the codebase.** Never compromise on type checking.
+
+#### What this means:
+- **Absolutely no use of `any` type**
+- **Always provide explicit types where TypeScript can't infer**
+- **Use proper type narrowing instead of type assertions**
+- **Define interfaces and types for all data structures**
+
+#### Examples in this project:
+- All function parameters must have explicit types
+- API responses should have defined interfaces
+- Avoid `as` casting unless absolutely necessary
+- Use `unknown` instead of `any` when type is truly unknown
+
+### Zero Tolerance for Lint Violations
+**All code must pass linting without exceptions.** Maintain code quality standards consistently.
+
+#### What this means:
+- **Never add eslint-disable comments**
+- **Never add @ts-ignore or @ts-nocheck**
+- **Fix the underlying issue, don't suppress the warning**
+- **All lint rules are there for a reason - respect them**
+
+#### Examples in this project:
+- If a lint rule is triggered, refactor the code to comply
+- Don't disable rules in configuration files
+- Address TypeScript errors properly, don't ignore them
+- Unused variables should be removed, not ignored
