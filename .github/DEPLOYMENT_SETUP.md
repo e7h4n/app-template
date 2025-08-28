@@ -15,22 +15,22 @@ This repository is configured to automatically create preview deployments for pu
 3. **PR Updates**: On new commits, the deployment is updated
 4. **PR Closes**: When merged or closed, the Neon branch is automatically deleted
 
-## Required GitHub Secrets
+## Required GitHub Secrets and Variables
 
-Configure these secrets in your GitHub repository settings (Settings → Secrets and variables → Actions):
+Configure these in your GitHub repository settings (Settings → Secrets and variables → Actions):
 
-### Vercel (Required)
+### Secrets (Store as Secrets)
 - `VERCEL_TOKEN`: Your Vercel personal access token
   - Generate at: https://vercel.com/account/tokens
-- `VERCEL_ORG_ID`: Your Vercel organization ID
-  - Find in Vercel project settings → General → Project ID section
-- `VERCEL_PROJECT_ID`: Your Vercel project ID
-  - Find in Vercel project settings → General → Project ID section
-
-### Neon (Optional but Recommended)
-- `NEON_API_KEY`: Your Neon API key
+- `NEON_API_KEY`: Your Neon API key (Optional but Recommended)
   - Generate at: https://console.neon.tech/app/settings/api-keys
-- `NEON_PROJECT_ID`: Your Neon project ID
+
+### Variables (Store as Repository Variables)
+- `VERCEL_TEAM_ID`: Your Vercel team/organization ID
+  - Find in Vercel project settings → General → Team ID
+- `VERCEL_PROJECT_ID`: Your Vercel project ID
+  - Find in Vercel project settings → General → Project ID
+- `NEON_PROJECT_ID`: Your Neon project ID (Optional but Recommended)
   - Find in Neon console → Project Settings → General
 
 **Note**: If Neon secrets are not configured, the deployment will still work but without database branching.
