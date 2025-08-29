@@ -25,11 +25,13 @@ vi.mock("../init-services", () => {
           pool: { mock: "pool" },
           db: { mock: "db" },
         };
-        
+
         Object.defineProperty(globalThis, "services", {
           get() {
             if (!mockServices) {
-              throw new Error("Services not initialized. Call initServices() first.");
+              throw new Error(
+                "Services not initialized. Call initServices() first.",
+              );
             }
             return mockServices;
           },
@@ -47,7 +49,10 @@ describe("initServices", () => {
     vi.clearAllMocks();
     mockServices = undefined;
     if ("services" in globalThis) {
-      const descriptor = Object.getOwnPropertyDescriptor(globalThis, "services");
+      const descriptor = Object.getOwnPropertyDescriptor(
+        globalThis,
+        "services",
+      );
       if (descriptor && descriptor.configurable) {
         delete (globalThis as { services?: Services }).services;
       }
@@ -61,30 +66,32 @@ describe("initServices", () => {
 
   it("should initialize services on globalThis", () => {
     expect((globalThis as { services?: Services }).services).toBeUndefined();
-    
+
     initServices();
-    
+
     const global = globalThis as unknown as { services: MockServices };
     expect(global.services).toBeDefined();
     expect(global.services.env).toBeDefined();
-    expect(global.services.env.DATABASE_URL).toBe("postgresql://test:test@localhost:5432/test");
+    expect(global.services.env.DATABASE_URL).toBe(
+      "postgresql://test:test@localhost:5432/test",
+    );
   });
 
   it("should not reinitialize if already initialized", () => {
     initServices();
     const global = globalThis as unknown as { services: MockServices };
     const firstEnv = global.services.env;
-    
+
     initServices();
     const secondEnv = global.services.env;
-    
+
     expect(firstEnv).toBe(secondEnv);
     expect(initServices).toHaveBeenCalledTimes(2);
   });
 
   it("should provide access to pool and db", () => {
     initServices();
-    
+
     const global = globalThis as unknown as { services: MockServices };
     expect(global.services.pool).toBeDefined();
     expect(global.services.db).toBeDefined();
