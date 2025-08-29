@@ -76,7 +76,7 @@ jobs:
         run: |
           pnpm install
           cd apps/web
-          pnpm db:push
+          pnpm db:migrate
         env:
           DATABASE_URL: ${{ env.DATABASE_URL }}
 
