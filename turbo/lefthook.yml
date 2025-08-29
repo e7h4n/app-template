@@ -5,5 +5,7 @@ pre-commit:
       run: cd turbo && pnpm turbo run lint
       glob: "turbo/**/*.{js,ts,tsx,jsx,mjs,cjs}"
     prettier:
-      run: cd turbo && pnpm prettier --list-different --ignore-unknown {staged_files}
+      run: |
+        files=$(echo "{staged_files}" | sed 's|turbo/||g')
+        cd turbo && pnpm prettier --list-different --ignore-unknown $files
       glob: "turbo/**/*"
