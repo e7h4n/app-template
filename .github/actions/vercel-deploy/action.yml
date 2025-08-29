@@ -12,10 +12,6 @@ inputs:
   vercel-project-id:
     description: 'Vercel project ID'
     required: true
-  root-directory:
-    description: 'Root directory for deployment'
-    required: false
-    default: '.'
   environment:
     description: 'Deployment environment (preview or production)'
     required: false
@@ -44,7 +40,6 @@ runs:
     - name: Deploy to Vercel
       id: deploy
       shell: bash
-      working-directory: ${{ inputs.root-directory }}
       env:
         VERCEL_ORG_ID: ${{ inputs.vercel-org-id }}
         VERCEL_PROJECT_ID: ${{ inputs.vercel-project-id }}
