@@ -61,3 +61,19 @@
 - Don't disable rules in configuration files
 - Address TypeScript errors properly, don't ignore them
 - Unused variables should be removed, not ignored
+
+## Pre-Commit Checks
+
+**All code must pass these checks before committing.** Run these commands from the `/turbo` directory to ensure code quality:
+
+### Required Checks:
+- **Lint:** `cd turbo && pnpm turbo run lint` - Check for code style and quality issues
+- **Type Check:** `cd turbo && pnpm check-types` - Verify TypeScript type safety
+- **Format:** `cd turbo && pnpm format` - Auto-format code according to project standards
+- **Test:** `cd turbo && pnpm vitest` - Run all tests to ensure functionality
+
+### Before Committing:
+1. Run all checks to ensure code quality
+2. Fix any issues that are found
+3. Never commit code that fails any of these checks
+4. These checks help maintain the high standards defined in our design principles
