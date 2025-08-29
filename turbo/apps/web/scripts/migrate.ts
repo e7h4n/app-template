@@ -20,11 +20,11 @@ async function runMigrations() {
 
   try {
     console.log(`📁 Running migrations from: ${drizzleConfig.out}`);
-    
-    await migrate(db, { 
-      migrationsFolder: drizzleConfig.out || "./src/db/migrations"
+
+    await migrate(db, {
+      migrationsFolder: drizzleConfig.out || "./src/db/migrations",
     });
-    
+
     console.log("✅ Migrations completed successfully!");
   } catch (error) {
     console.error("❌ Migration failed:", error);
