@@ -16,7 +16,4 @@ jobs:
       - uses: ./.github/actions/init
 
       - name: Lint
-        run: |
-          cd turbo
-          pnpm turbo run lint
-          pnpm prettier --check .
+        run: npx -y @evilmartians/lefthook run pre-commit --all-files

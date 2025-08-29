@@ -5,9 +5,7 @@
     "ghcr.io/devcontainers/features/node:1": {
       "version": "22"
     },
-    "ghcr.io/devcontainers-extra/features/pnpm:2": {
-      "version": "10"
-    },
+    "ghcr.io/devcontainers-extra/features/pnpm:2": {},
     "ghcr.io/devcontainers/features/github-cli:1": {},
     "ghcr.io/devcontainers-extra/features/lefthook-asdf:1": {},
     "ghcr.io/itsmechlark/features/postgresql:1": {},
