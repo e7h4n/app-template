@@ -1,5 +1,40 @@
 # Claude Code Project Guidelines
 
+## Global Services Pattern
+
+### How to Use Services
+
+We use a simple global services pattern for managing singletons like database connections:
+
+```typescript
+// In any API route or server component
+import { initServices } from "../lib/init-services";
+
+export async function GET() {
+  // Initialize services at entry point (idempotent - safe to call multiple times)
+  initServices();
+  
+  // Access services directly from globalThis
+  const users = await globalThis.services.db.select().from(users);
+  const env = globalThis.services.env;
+  
+  return NextResponse.json({ users });
+}
+```
+
+### Key Points
+
+- **Always call `initServices()` at the entry point** - This ensures services are initialized
+- **Services are lazy-loaded** - Database connections are only created when first accessed
+- **No cleanup needed** - Serverless functions handle cleanup automatically
+- **Type-safe** - Full TypeScript support via global type declarations
+
+### Available Services
+
+- `globalThis.services.env` - Validated environment variables
+- `globalThis.services.db` - Drizzle database instance
+- `globalThis.services.pool` - PostgreSQL connection pool
+
 ## Architecture Design Principles
 
 ### YAGNI (You Aren't Gonna Need It)
