@@ -3,7 +3,7 @@ import { z } from "zod";
 
 /**
  * Environment configuration schema
- * Lazy-loaded to avoid module-level side effects
+ * Call this function to get validated environment variables
  */
 export function getEnvSchema() {
   return createEnv({
