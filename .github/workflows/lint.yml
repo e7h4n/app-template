@@ -16,4 +16,5 @@ jobs:
       - uses: ./.github/actions/init
 
       - name: Lint
+        working-directory: turbo
         run: npx -y @evilmartians/lefthook run pre-commit --all-files
