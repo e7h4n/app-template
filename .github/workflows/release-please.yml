@@ -48,12 +48,12 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 9
+          version: 9.0.0
       
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'pnpm'
           cache-dependency-path: turbo/pnpm-lock.yaml
       
@@ -88,12 +88,12 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 9
+          version: 9.0.0
       
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'pnpm'
           cache-dependency-path: turbo/pnpm-lock.yaml
       
@@ -129,7 +129,7 @@ jobs:
       # Setup .npmrc file to publish to npm
       - uses: actions/setup-node@v4
         with:
-          node-version: "22.x"
+          node-version: "22"
           registry-url: "https://registry.npmjs.org"
 
       - run: cd turbo && pnpm turbo run build --filter=@repo/cli

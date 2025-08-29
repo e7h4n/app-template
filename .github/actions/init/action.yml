@@ -6,7 +6,7 @@ runs:
   steps:
     - uses: pnpm/action-setup@v4
       with:
-        version: 10
+        version: 9.0.0
         run_install: |
           - cwd: turbo
             args: [--frozen-lockfile, --strict-peer-dependencies]
