@@ -3,7 +3,9 @@ import { config } from "dotenv";
 
 config({ path: "./.env" });
 
-import { env } from "./src/env";
+import { getEnvSchema } from "./src/env";
+
+const env = getEnvSchema();
 
 export default defineConfig({
   schema: "./src/db/schema/*",
