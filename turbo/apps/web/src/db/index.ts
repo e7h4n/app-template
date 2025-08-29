@@ -1,28 +1,22 @@
-import { drizzle } from "drizzle-orm/node-postgres";
-import { Pool } from "pg";
-import { schema } from "./db";
-import { env } from "../env";
+import { getContainer } from "../lib/container";
+import type { NodePgDatabase } from "drizzle-orm/node-postgres";
+import type { schema } from "./db";
 
-const connectionString = env.DATABASE_URL;
-
-let db: ReturnType<typeof drizzle<typeof schema>> | null = null;
-let pool: Pool | null = null;
-
-export function getDb() {
-  if (!db) {
-    pool = new Pool({ connectionString });
-    db = drizzle(pool, { schema });
-  }
-
-  return db;
+/**
+ * Get database instance from container
+ * The database will be automatically initialized on first use
+ */
+export async function getDb(): Promise<NodePgDatabase<typeof schema>> {
+  const container = getContainer();
+  return container.get("db");
 }
 
-export async function closeDb() {
-  if (pool) {
-    await pool.end();
-    pool = null;
-    db = null;
-  }
+/**
+ * Close database connection
+ */
+export async function closeDb(): Promise<void> {
+  const container = getContainer();
+  await container.close();
 }
 
-export type Database = ReturnType<typeof getDb>;
+export type Database = NodePgDatabase<typeof schema>;
