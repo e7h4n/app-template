@@ -14,7 +14,7 @@ let _services: Services | undefined;
 /**
  * Initialize global services
  * Call this at the entry point of serverless functions
- * 
+ *
  * @example
  * // In API Route
  * export async function GET() {
@@ -29,7 +29,7 @@ export function initServices(): void {
   }
 
   const isVercel = !!process.env.VERCEL;
-  
+
   _services = {
     get env() {
       if (!_env) {
@@ -39,7 +39,7 @@ export function initServices(): void {
     },
     get pool() {
       if (!_pool) {
-        _pool = new Pool({ 
+        _pool = new Pool({
           connectionString: this.env.DATABASE_URL,
           // Serverless environments should use single connection
           max: isVercel ? 1 : 10,
@@ -58,10 +58,10 @@ export function initServices(): void {
   };
 
   // Define getter on globalThis to ensure services is always available after init
-  Object.defineProperty(globalThis, 'services', {
+  Object.defineProperty(globalThis, "services", {
     get() {
       if (!_services) {
-        throw new Error('Services not initialized. Call initServices() first.');
+        throw new Error("Services not initialized. Call initServices() first.");
       }
       return _services;
     },
