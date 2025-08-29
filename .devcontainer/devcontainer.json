@@ -6,7 +6,8 @@
     "ghcr.io/devcontainers-extra/features/pnpm:2": {},
     "ghcr.io/devcontainers/features/github-cli:1": {},
     "ghcr.io/devcontainers-extra/features/lefthook-asdf:1": {},
-    "ghcr.io/itsmechlark/features/postgresql:1": {}
+    "ghcr.io/itsmechlark/features/postgresql:1": {},
+    "ghcr.io/devcontainers-contrib/features/vim-apt-get-zsh:1": {}
   },
   "forwardPorts": [4983],
   "remoteEnv": {
