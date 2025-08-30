@@ -95,5 +95,6 @@ runs:
         step: finish
         token: ${{ github.token }}
         status: ${{ job.status }}
+        env: ${{ inputs.environment }}
         env_url: ${{ steps.deploy.outputs.url }}
         deployment_id: ${{ steps.deployment.outputs.deployment_id }}
