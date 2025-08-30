@@ -32,6 +32,9 @@ outputs:
   deployment-url:
     description: "The URL of the deployment"
     value: ${{ steps.deploy.outputs.url }}
+  deployment-id:
+    description: "The GitHub deployment ID"
+    value: ${{ steps.create-deployment.outputs.deployment-id }}
 
 runs:
   using: "composite"
@@ -66,6 +69,41 @@ runs:
       shell: bash
       run: |
         vercel build --token=${{ inputs.vercel-token }}
+
+    - name: Create GitHub deployment
+      id: create-deployment
+      shell: bash
+      run: |
+        # Create GitHub deployment record
+        if [ "${{ github.event_name }}" == "pull_request" ] || [ "${{ github.event_name }}" == "push" ]; then
+          DEPLOYMENT_JSON=$(curl -s -X POST \
+            -H "Authorization: token ${{ github.token }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/${{ github.repository }}/deployments \
+            -d "{
+              \"ref\": \"${{ github.sha }}\",
+              \"environment\": \"${{ inputs.environment }}\",
+              \"description\": \"Vercel deployment for ${{ github.ref_name }}\",
+              \"auto_merge\": false,
+              \"required_contexts\": []
+            }")
+          
+          DEPLOYMENT_ID=$(echo "$DEPLOYMENT_JSON" | jq -r '.id')
+          echo "deployment-id=$DEPLOYMENT_ID" >> $GITHUB_OUTPUT
+          echo "Created GitHub deployment: $DEPLOYMENT_ID"
+          
+          # Set deployment status to in_progress
+          curl -s -X POST \
+            -H "Authorization: token ${{ github.token }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/${{ github.repository }}/deployments/$DEPLOYMENT_ID/statuses \
+            -d "{
+              \"state\": \"in_progress\",
+              \"description\": \"Deploying to Vercel...\"
+            }"
+        else
+          echo "deployment-id=" >> $GITHUB_OUTPUT
+        fi
 
     - name: Deploy to Vercel
       id: deploy
@@ -107,3 +145,34 @@ runs:
         # Output the deployment URL
         echo "url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
         echo "Deployment URL: $DEPLOYMENT_URL"
+
+    - name: Update deployment status - success
+      shell: bash
+      if: success() && steps.create-deployment.outputs.deployment-id != ''
+      run: |
+        # Update GitHub deployment status to success
+        curl -s -X POST \
+          -H "Authorization: token ${{ github.token }}" \
+          -H "Accept: application/vnd.github.v3+json" \
+          https://api.github.com/repos/${{ github.repository }}/deployments/${{ steps.create-deployment.outputs.deployment-id }}/statuses \
+          -d "{
+            \"state\": \"success\",
+            \"target_url\": \"${{ steps.deploy.outputs.url }}\",
+            \"description\": \"Vercel deployment successful\"
+          }"
+        echo "Updated deployment status to success"
+
+    - name: Update deployment status - failure
+      shell: bash
+      if: failure() && steps.create-deployment.outputs.deployment-id != ''
+      run: |
+        # Update GitHub deployment status to failure
+        curl -s -X POST \
+          -H "Authorization: token ${{ github.token }}" \
+          -H "Accept: application/vnd.github.v3+json" \
+          https://api.github.com/repos/${{ github.repository }}/deployments/${{ steps.create-deployment.outputs.deployment-id }}/statuses \
+          -d "{
+            \"state\": \"failure\",
+            \"description\": \"Vercel deployment failed\"
+          }"
+        echo "Updated deployment status to failure"
