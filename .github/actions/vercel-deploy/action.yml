@@ -37,6 +37,7 @@ runs:
   using: "composite"
   steps:
     - name: Install Vercel CLI
+      shell: bash
       if: github.event.action != 'closed'
       run: |
         # Check if Vercel CLI is installed, install if not
