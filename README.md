@@ -16,7 +16,11 @@ Here's what I need you to do:
 4. Use Vercel API to create web and docs projects automatically
 5. Set up all repository secrets and variables using GitHub CLI
 6. Replace all "makita" references in the code with my project name
-7. Initialize git repository with initial commit: `git add . && git commit -m "init commit" && git push`
+7. Install dependencies and initialize git repository:
+   ```bash
+   cd turbo && pnpm install
+   cd .. && git add . && git commit -m "init commit" && git push
+   ```
 8. Guide me through any additional setup steps
 
 Required GitHub repository secrets (use `gh secret set`):
@@ -65,7 +69,7 @@ After pasting this prompt, your coding AI will automatically:
 - Set up Vercel projects for web and docs with proper monorepo configuration
 - Configure all required secrets and environment variables
 - Replace project names throughout the codebase
-- Initialize git repository with initial commit and push
+- Install dependencies (pnpm install) and initialize git repository with commit and push
 - Set up the complete CI/CD pipeline
 
 ## 🚀 Features
