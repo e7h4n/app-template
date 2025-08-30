@@ -50,7 +50,6 @@ Template repository: https://github.com/e7h4n/makita
 
 Use Vercel API to automatically create:
 - Web project: POST https://api.vercel.com/v11/projects with configuration:
-  ```json
   {
     "name": "{project-name}-web",
     "rootDirectory": "turbo/apps/web",
@@ -58,9 +57,7 @@ Use Vercel API to automatically create:
     "framework": "nextjs",
     "commandForIgnoringBuildStep": "echo 'Ignored Build Step - builds are handled by GitHub Actions'"
   }
-  ```
 - Docs project: POST https://api.vercel.com/v11/projects with configuration:
-  ```json
   {
     "name": "{project-name}-docs", 
     "rootDirectory": "turbo/apps/docs",
@@ -68,7 +65,6 @@ Use Vercel API to automatically create:
     "framework": "nextjs",
     "commandForIgnoringBuildStep": "echo 'Ignored Build Step - builds are handled by GitHub Actions'"
   }
-  ```
 - Get project IDs from responses and set as VERCEL_PROJECT_ID_WEB and VERCEL_PROJECT_ID_DOCS
 
 Please guide me through this process step by step, asking for one piece of information at a time and explaining what each token is used for.
