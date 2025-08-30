@@ -32,47 +32,36 @@ outputs:
   deployment-url:
     description: "The URL of the deployment"
     value: ${{ steps.deploy.outputs.url }}
+  deployment-id:
+    description: "The GitHub deployment ID"
+    value: ${{ steps.start-deployment.outputs.deployment_id }}
 
 runs:
   using: "composite"
   steps:
-    - name: Install Vercel CLI
-      shell: bash
-      if: github.event.action != 'closed'
-      run: |
-        # Check if Vercel CLI is installed, install if not
-        if ! command -v vercel &> /dev/null; then
-          echo "Vercel CLI not found, installing..."
-          npm install -g vercel@latest
-        else
-          echo "Vercel CLI already installed"
-        fi
+    - name: Setup Vercel
+      uses: ./.github/actions/vercel-setup
+      with:
+        vercel-token: ${{ inputs.vercel-token }}
+        vercel-org-id: ${{ inputs.vercel-org-id }}
+        vercel-project-id: ${{ inputs.vercel-project-id }}
 
-        # Output Vercel version
-        echo "Vercel CLI version:"
-        vercel --version
-
-    - name: Prepare Vercel configuration
-      shell: bash
-      run: |
-        # Initialize Vercel project configuration
-        mkdir -p .vercel
-        echo '{"orgId":"${{ inputs.vercel-org-id }}","projectId":"${{ inputs.vercel-project-id }}"}' > .vercel/project.json
-        pwd
-        cat .vercel/project.json
-        vercel pull --token=${{ inputs.vercel-token }}
-
-    - name: Build
-      shell: bash
-      run: |
-        vercel build --token=${{ inputs.vercel-token }}
+    - name: Start deployment
+      id: start-deployment
+      uses: bobheadxi/deployments@v1
+      if: github.event_name == 'pull_request' || github.event_name == 'push'
+      with:
+        step: start
+        token: ${{ github.token }}
+        env: ${{ inputs.environment }}
+        desc: Vercel deployment for ${{ github.ref_name }}
 
     - name: Deploy to Vercel
       id: deploy
       shell: bash
       run: |
         # Build deployment command
-        DEPLOY_CMD="vercel deploy --prebuilt --token=${{ inputs.vercel-token }}"
+        DEPLOY_CMD="vercel deploy --token=${{ inputs.vercel-token }}"
 
         # Add production flag if needed
         if [ "${{ inputs.environment }}" == "production" ]; then
@@ -107,3 +96,24 @@ runs:
         # Output the deployment URL
         echo "url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
         echo "Deployment URL: $DEPLOYMENT_URL"
+
+    - name: Update deployment status - success
+      uses: bobheadxi/deployments@v1
+      if: success() && steps.start-deployment.outputs.deployment_id
+      with:
+        step: finish
+        token: ${{ github.token }}
+        status: success
+        env: ${{ inputs.environment }}
+        env_url: ${{ steps.deploy.outputs.url }}
+        deployment_id: ${{ steps.start-deployment.outputs.deployment_id }}
+
+    - name: Update deployment status - failure
+      uses: bobheadxi/deployments@v1
+      if: failure() && steps.start-deployment.outputs.deployment_id
+      with:
+        step: finish
+        token: ${{ github.token }}
+        status: failure
+        env: ${{ inputs.environment }}
+        deployment_id: ${{ steps.start-deployment.outputs.deployment_id }}

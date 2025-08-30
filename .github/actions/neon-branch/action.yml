@@ -1,0 +1,83 @@
+name: "Neon Branch Management"
+description: "Create, update, and delete Neon database branches for preview environments"
+
+inputs:
+  neon-api-key:
+    description: "Neon API key for authentication"
+    required: true
+  neon-project-id:
+    description: "Neon project ID"
+    required: true
+  branch-name:
+    description: "Name of the database branch to create/manage"
+    required: true
+  action:
+    description: "Action to perform: create, cleanup"
+    required: true
+    default: "create"
+  database-name:
+    description: "Database name for connection string"
+    required: false
+    default: "neondb"
+
+outputs:
+  database-url:
+    description: "Database connection URL for the branch"
+    value: ${{ steps.create-branch.outputs.database-url }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install Neon CLI
+      shell: bash
+      run: npm install -g neonctl@latest
+
+    - name: Create or Update Neon Branch
+      id: branch
+      if: inputs.action == 'create'
+      shell: bash
+      env:
+        NEON_API_KEY: ${{ inputs.neon-api-key }}
+        NEON_PROJECT_ID: ${{ inputs.neon-project-id }}
+      run: |
+        BRANCH_NAME="${{ inputs.branch-name }}"
+
+        if neonctl branches list --project-id $NEON_PROJECT_ID --output json | jq -e ".[] | select(.name == \"$BRANCH_NAME\")" > /dev/null 2>&1; then
+          echo "Branch $BRANCH_NAME already exists"
+        else
+          echo "Create branch $BRANCH_NAME"
+          neonctl branches create --name $BRANCH_NAME --project-id $NEON_PROJECT_ID
+        fi
+
+        DATABASE_URL=$(neonctl connection-string $BRANCH_NAME --project-id $NEON_PROJECT_ID --database-name ${{ inputs.database-name }} --pooled)
+        echo "database-url=$DATABASE_URL" >> $GITHUB_OUTPUT
+        echo "Neon branch ready: $BRANCH_NAME"
+
+    - name: Run Database Migrations
+      if: inputs.action == 'create'
+      shell: bash
+      env:
+        DATABASE_URL: ${{ steps.branch.outputs.database-url }}
+      run: |
+        if [ -n "$DATABASE_URL" ]; then
+          echo "Running database migrations..."
+          cd turbo && pnpm -F web db:migrate
+        else
+          echo "No database URL provided, skipping migrations"
+        fi
+
+    - name: Delete Neon Branch
+      if: inputs.action == 'cleanup'
+      shell: bash
+      env:
+        NEON_API_KEY: ${{ inputs.neon-api-key }}
+        NEON_PROJECT_ID: ${{ inputs.neon-project-id }}
+      run: |
+        BRANCH_NAME="${{ inputs.branch-name }}"
+
+        # Check if branch exists before trying to delete
+        if neonctl branches list --project-id $NEON_PROJECT_ID --output json | jq -e ".[] | select(.name == \"$BRANCH_NAME\")" > /dev/null 2>&1; then
+          echo "Deleting branch $BRANCH_NAME"
+          neonctl branches delete $BRANCH_NAME --project-id $NEON_PROJECT_ID
+          echo "Branch $BRANCH_NAME deleted successfully"
+        fi

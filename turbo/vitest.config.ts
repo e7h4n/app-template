@@ -18,6 +18,7 @@ export default defineConfig({
         "**/*.test.{ts,tsx,js,jsx}",
         "**/__tests__/**",
         "**/.next/**",
+        "**/dist/**",
         "packages/eslint-config/*.js",
       ],
     },
