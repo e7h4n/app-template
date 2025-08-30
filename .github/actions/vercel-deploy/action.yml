@@ -65,7 +65,7 @@ runs:
     - name: Build
       shell: bash
       run: |
-        vercel build --prod --token=${{ inputs.vercel-token }}
+        vercel build --token=${{ inputs.vercel-token }}
 
     - name: Deploy to Vercel
       id: deploy
