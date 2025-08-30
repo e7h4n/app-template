@@ -52,8 +52,7 @@ runs:
         echo "Vercel CLI version:"
         vercel --version
 
-    - name: Deploy to Vercel
-      id: deploy
+    - name: Prepare Vercel configuration
       shell: bash
       run: |
         # Initialize Vercel project configuration
@@ -62,6 +61,10 @@ runs:
 
         vercel pull --token=${{ inputs.vercel-token }} --environment=${{ inputs.environment }}
 
+    - name: Deploy to Vercel
+      id: deploy
+      shell: bash
+      run: |
         # Build deployment command
         DEPLOY_CMD="vercel deploy --token=${{ inputs.vercel-token }}"
 
