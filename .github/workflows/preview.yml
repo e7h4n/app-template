@@ -66,6 +66,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: ./.github/actions/init
+        if: github.event.action != 'closed'
+
       - name: Deploy Web to Vercel
         id: deploy
         uses: ./.github/actions/vercel-deploy
@@ -88,6 +91,9 @@ jobs:
       deployments: write
     steps:
       - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/init
+        if: github.event.action != 'closed'
 
       - name: Deploy Docs to Vercel
         id: deploy

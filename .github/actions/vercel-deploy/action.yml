@@ -58,6 +58,8 @@ runs:
         # Initialize Vercel project configuration
         mkdir -p .vercel
         echo '{"orgId":"${{ inputs.vercel-org-id }}","projectId":"${{ inputs.vercel-project-id }}"}' > .vercel/project.json
+        pwd
+        cat .vercel/project.json
         vercel pull --token=${{ inputs.vercel-token }}
 
     - name: Build
