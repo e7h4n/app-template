@@ -1,4 +1,4 @@
-# E7h4n's App Template
+# Makita
 
 A modern monorepo template with strict typing, comprehensive testing support, and multi-language capabilities.
 

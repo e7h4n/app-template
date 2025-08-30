@@ -1,11 +1,11 @@
-import { FOO } from "@repo/core";
+import { FOO } from "@makita/core";
 import { Command } from "commander";
 import chalk from "chalk";
 
 const program = new Command();
 
 program
-  .name("app-cli")
+  .name("makita-cli")
   .description("App CLI - A modern build tool")
   .version("0.1.0");
 

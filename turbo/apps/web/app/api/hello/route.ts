@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { HelloRequestSchema } from "@repo/core";
+import { HelloRequestSchema } from "@makita/core";
 import { z } from "zod";
 
 const greetings = {

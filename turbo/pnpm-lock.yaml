@@ -29,7 +29,7 @@ importers:
 
   apps/cli:
     dependencies:
-      '@repo/core':
+      '@makita/core':
         specifier: workspace:*
         version: link:../../packages/core
       chalk:
@@ -39,10 +39,10 @@ importers:
         specifier: ^14.0.0
         version: 14.0.0
     devDependencies:
-      '@repo/eslint-config':
+      '@makita/eslint-config':
         specifier: workspace:*
         version: link:../../packages/eslint-config
-      '@repo/typescript-config':
+      '@makita/typescript-config':
         specifier: workspace:*
         version: link:../../packages/typescript-config
       '@types/node':
@@ -85,10 +85,10 @@ importers:
         specifier: ^19.1.1
         version: 19.1.1(react@19.1.1)
     devDependencies:
-      '@repo/eslint-config':
+      '@makita/eslint-config':
         specifier: workspace:*
         version: link:../../packages/eslint-config
-      '@repo/typescript-config':
+      '@makita/typescript-config':
         specifier: workspace:*
         version: link:../../packages/typescript-config
       '@tailwindcss/postcss':
@@ -121,15 +121,15 @@ importers:
 
   apps/web:
     dependencies:
+      '@makita/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@makita/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
       '@neondatabase/serverless':
         specifier: ^1.0.1
         version: 1.0.1
-      '@repo/core':
-        specifier: workspace:*
-        version: link:../../packages/core
-      '@repo/ui':
-        specifier: workspace:*
-        version: link:../../packages/ui
       '@t3-oss/env-nextjs':
         specifier: ^0.13.8
         version: 0.13.8(typescript@5.9.2)(zod@4.1.5)
@@ -164,10 +164,10 @@ importers:
         specifier: ^4.1.5
         version: 4.1.5
     devDependencies:
-      '@repo/eslint-config':
+      '@makita/eslint-config':
         specifier: workspace:*
         version: link:../../packages/eslint-config
-      '@repo/typescript-config':
+      '@makita/typescript-config':
         specifier: workspace:*
         version: link:../../packages/typescript-config
       '@testing-library/jest-dom':
@@ -219,10 +219,10 @@ importers:
         specifier: ^4.1.5
         version: 4.1.5
     devDependencies:
-      '@repo/eslint-config':
+      '@makita/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
-      '@repo/typescript-config':
+      '@makita/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config
       typescript:
@@ -279,10 +279,10 @@ importers:
         specifier: ^19.1.1
         version: 19.1.1(react@19.1.1)
     devDependencies:
-      '@repo/eslint-config':
+      '@makita/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
-      '@repo/typescript-config':
+      '@makita/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config
       '@types/node':

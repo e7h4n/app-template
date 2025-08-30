@@ -21,7 +21,7 @@ jobs:
       - uses: ./.github/actions/init
 
       - name: Build CLI
-        run: cd turbo && pnpm turbo run build --filter=@repo/cli
+        run: cd turbo && pnpm turbo run build --filter=@makita/cli
 
       - name: Install CLI globally
         run: cd turbo/apps/cli && npm link

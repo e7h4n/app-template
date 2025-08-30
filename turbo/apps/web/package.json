@@ -17,8 +17,8 @@
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.0.1",
-    "@repo/core": "workspace:*",
-    "@repo/ui": "workspace:*",
+    "@makita/core": "workspace:*",
+    "@makita/ui": "workspace:*",
     "@t3-oss/env-nextjs": "^0.13.8",
     "@ts-rest/core": "^3.52.1",
     "@ts-rest/serverless": "^3.52.1",
@@ -32,8 +32,8 @@
     "zod": "^4.1.5"
   },
   "devDependencies": {
-    "@repo/eslint-config": "workspace:*",
-    "@repo/typescript-config": "workspace:*",
+    "@makita/eslint-config": "workspace:*",
+    "@makita/typescript-config": "workspace:*",
     "@testing-library/jest-dom": "^6.7.0",
     "@testing-library/react": "^16.1.0",
     "@types/node": "^24.3.0",

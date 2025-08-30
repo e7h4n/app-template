@@ -1,4 +1,4 @@
-# @repo/cli
+# @makita/cli
 
 The CLI application - a modern command-line tool.
 
@@ -68,4 +68,4 @@ The CLI is built with:
 - **Commander.js** - Command-line interface framework
 - **Chalk** - Terminal string styling
 - **tsup** - TypeScript bundler for fast builds
-- **@repo/core** - Shared core functionality
+- **@makita/core** - Shared core functionality

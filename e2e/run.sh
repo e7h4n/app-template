@@ -24,8 +24,8 @@ if [[ ! -f "$BATS_BIN" ]]; then
 fi
 
 # Build the CLI before testing
-echo -e "${YELLOW}Building @repo/cli...${NC}"
-(cd "$SCRIPT_DIR/../turbo" && pnpm build --filter @repo/cli)
+echo -e "${YELLOW}Building @makita/cli...${NC}"
+(cd "$SCRIPT_DIR/../turbo" && pnpm build --filter @makita/cli)
 
 # Ensure CLI is available globally
 echo -e "${YELLOW}Linking CLI globally...${NC}"

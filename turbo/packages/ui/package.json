@@ -1,5 +1,5 @@
 {
-  "name": "@repo/ui",
+  "name": "@makita/ui",
   "version": "0.0.0",
   "private": true,
   "exports": {
@@ -11,8 +11,8 @@
     "check-types": "tsc --noEmit"
   },
   "devDependencies": {
-    "@repo/eslint-config": "workspace:*",
-    "@repo/typescript-config": "workspace:*",
+    "@makita/eslint-config": "workspace:*",
+    "@makita/typescript-config": "workspace:*",
     "@types/node": "^24.3.0",
     "@types/react": "^19.1.12",
     "@types/react-dom": "^19.1.9",
