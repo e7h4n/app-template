@@ -61,7 +61,7 @@ jobs:
           name: turbo-build-${{ github.run_id }}
           include-hidden-files: true
           path: |
-            turbo/**/dist/**/*
+            turbo/apps/*/dist
           retention-days: 7
 
   database:
