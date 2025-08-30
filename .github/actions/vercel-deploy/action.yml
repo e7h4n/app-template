@@ -28,14 +28,6 @@ inputs:
     required: false
     default: ""
 
-outputs:
-  deployment-url:
-    description: "The URL of the deployment"
-    value: ${{ steps.deploy.outputs.url }}
-  deployment-id:
-    description: "The GitHub deployment ID"
-    value: ${{ steps.start-deployment.outputs.deployment_id }}
-
 runs:
   using: "composite"
   steps:
@@ -46,6 +38,7 @@ runs:
         step: start
         token: ${{ github.token }}
         env: ${{ inputs.environment }}
+        desc: Deploying ${{ inputs.environment }} environment
 
     - name: Setup Vercel
       uses: ./.github/actions/vercel-setup
