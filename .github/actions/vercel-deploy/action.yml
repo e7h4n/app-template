@@ -41,7 +41,6 @@ runs:
   steps:
     - name: Install Vercel CLI
       shell: bash
-      if: github.event.action != 'closed'
       run: |
         # Check if Vercel CLI is installed, install if not
         if ! command -v vercel &> /dev/null; then
@@ -63,12 +62,6 @@ runs:
         echo '{"orgId":"${{ inputs.vercel-org-id }}","projectId":"${{ inputs.vercel-project-id }}"}' > .vercel/project.json
         pwd
         cat .vercel/project.json
-        vercel pull --token=${{ inputs.vercel-token }}
-
-    - name: Build
-      shell: bash
-      run: |
-        vercel build --token=${{ inputs.vercel-token }}
 
     - name: Start deployment
       id: start-deployment
