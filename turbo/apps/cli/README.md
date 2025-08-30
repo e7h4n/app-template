@@ -1,4 +1,4 @@
-# @makita/cli
+# makita-cli
 
 The CLI application - a modern command-line tool.
 

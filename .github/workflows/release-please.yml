@@ -52,7 +52,7 @@ jobs:
           node-version: "22.x"
           registry-url: "https://registry.npmjs.org"
 
-      - run: cd turbo && pnpm turbo run build --filter=@makita/cli
+      - run: cd turbo && pnpm turbo run build --filter=makita-cli
 
       - run: cd turbo/apps/cli/dist && npm publish --access public --no-git-checks
         env:
