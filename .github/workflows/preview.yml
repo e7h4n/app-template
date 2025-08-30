@@ -5,22 +5,22 @@ on:
     types: [opened, synchronize, reopened, closed]
 
 jobs:
-  preview:
+  database:
     runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
-      deployments: write
-
+    outputs:
+      database-url: ${{ steps.neon.outputs.database-url }}
     steps:
       - uses: actions/checkout@v4
 
       - uses: ./.github/actions/init
+        if: github.event.action != 'closed'
 
       - name: Install Neon CLI
         run: npm install -g neonctl@latest
 
       - name: Create or Update Neon Branch
         if: github.event.action != 'closed'
+        id: neon
         env:
           NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
           NEON_PROJECT_ID: ${{ vars.NEON_PROJECT_ID }}
@@ -34,17 +34,40 @@ jobs:
           neonctl branches create --name $BRANCH_NAME --project-id $NEON_PROJECT_ID
 
           DATABASE_URL=$(neonctl connection-string $BRANCH_NAME --project-id $NEON_PROJECT_ID --database-name neondb --pooled)
-          echo "DATABASE_URL=$DATABASE_URL" >> $GITHUB_ENV
+          echo "database-url=$DATABASE_URL" >> $GITHUB_OUTPUT
 
       - name: Run Database Migrations
         if: github.event.action != 'closed'
         env:
-          DATABASE_URL: ${{ env.DATABASE_URL }}
+          DATABASE_URL: ${{ steps.neon.outputs.database-url }}
         run: cd turbo && pnpm -F web db:migrate
 
+      - name: Delete Neon Branch
+        if: github.event.action == 'closed'
+        env:
+          NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+          NEON_PROJECT_ID: ${{ vars.NEON_PROJECT_ID }}
+        run: |
+          BRANCH_NAME="preview-pr-${{ github.event.pull_request.number }}"
+
+          # Check if branch exists before trying to delete
+          if neonctl branches list --project-id $NEON_PROJECT_ID --output json | jq -e ".[] | select(.name == \"$BRANCH_NAME\")" > /dev/null 2>&1; then
+            echo "Deleting branch $BRANCH_NAME"
+            neonctl branches delete $BRANCH_NAME --project-id $NEON_PROJECT_ID
+          fi
+
+  deploy-web:
+    needs: database
+    if: github.event.action != 'closed'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      deployments: write
+    steps:
+      - uses: actions/checkout@v4
+
       - name: Deploy Web to Vercel
-        if: github.event.action != 'closed'
-        id: deploy_web
+        id: deploy
         uses: ./.github/actions/vercel-deploy
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
@@ -52,13 +75,22 @@ jobs:
           vercel-project-id: ${{ vars.VERCEL_PROJECT_ID_WEB }}
           environment: preview
           environment-variables: |
-            DATABASE_URL=${{ env.DATABASE_URL }}
+            DATABASE_URL=${{ needs.database.outputs.database-url }}
           meta-branch: ${{ github.head_ref }}
           meta-pr: ${{ github.event.pull_request.number }}
 
+  deploy-docs:
+    needs: database
+    if: github.event.action != 'closed' && vars.VERCEL_PROJECT_ID_DOCS != ''
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      deployments: write
+    steps:
+      - uses: actions/checkout@v4
+
       - name: Deploy Docs to Vercel
-        if: github.event.action != 'closed' && vars.VERCEL_PROJECT_ID_DOCS != ''
-        id: deploy_docs
+        id: deploy
         uses: ./.github/actions/vercel-deploy
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
@@ -68,8 +100,13 @@ jobs:
           meta-branch: ${{ github.head_ref }}
           meta-pr: ${{ github.event.pull_request.number }}
 
+  cleanup:
+    if: github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    permissions:
+      deployments: write
+    steps:
       - name: Mark Deployments as Inactive
-        if: github.event.action == 'closed'
         uses: actions/github-script@v7
         with:
           script: |
@@ -90,17 +127,3 @@ jobs:
                 description: 'PR closed - deployment removed'
               });
             }
-
-      - name: Delete Neon Branch
-        if: github.event.action == 'closed'
-        env:
-          NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
-          NEON_PROJECT_ID: ${{ vars.NEON_PROJECT_ID }}
-        run: |
-          BRANCH_NAME="preview-pr-${{ github.event.pull_request.number }}"
-
-          # Check if branch exists before trying to delete
-          if neonctl branches list --project-id $NEON_PROJECT_ID --output json | jq -e ".[] | select(.name == \"$BRANCH_NAME\")" > /dev/null 2>&1; then
-            echo "Deleting branch $BRANCH_NAME"
-            neonctl branches delete $BRANCH_NAME --project-id $NEON_PROJECT_ID
-          fi
