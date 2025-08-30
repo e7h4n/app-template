@@ -43,14 +43,15 @@ runs:
         BRANCH_NAME="${{ inputs.branch-name }}"
 
         if neonctl branches list --project-id $NEON_PROJECT_ID --output json | jq -e ".[] | select(.name == \"$BRANCH_NAME\")" > /dev/null 2>&1; then
-          echo "Branch $BRANCH_NAME already exists, deleting and recreating"
-          neonctl branches delete $BRANCH_NAME --project-id $NEON_PROJECT_ID || true
+          echo "Branch $BRANCH_NAME already exists"
+        else
+          echo "Create branch $BRANCH_NAME"
+          neonctl branches create --name $BRANCH_NAME --project-id $NEON_PROJECT_ID
         fi
-        neonctl branches create --name $BRANCH_NAME --project-id $NEON_PROJECT_ID
 
         DATABASE_URL=$(neonctl connection-string $BRANCH_NAME --project-id $NEON_PROJECT_ID --database-name ${{ inputs.database-name }} --pooled)
         echo "database-url=$DATABASE_URL" >> $GITHUB_OUTPUT
-        echo "Created Neon branch: $BRANCH_NAME"
+        echo "Neon branch ready: $BRANCH_NAME"
 
     - name: Run Database Migrations
       if: inputs.action == 'create'
