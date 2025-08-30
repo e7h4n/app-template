@@ -1,7 +1,6 @@
 name: Turbo
 
 on:
-  pull_request:
   push:
     branches:
       - main
@@ -10,9 +9,6 @@ on:
       artifact-name:
         description: "Name of the uploaded build artifact"
         value: ${{ jobs.build.outputs.artifact-name }}
-      database-url:
-        description: "Database URL for preview environment"
-        value: ${{ jobs.database.outputs.database-url }}
 
 jobs:
   test:
@@ -63,81 +59,3 @@ jobs:
           path: |
             turbo/apps/*/dist
           retention-days: 7
-
-  database:
-    runs-on: ubuntu-latest
-    needs: test
-    if: github.event_name == 'pull_request'
-    outputs:
-      database-url: ${{ steps.branch.outputs.database-url }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: ./.github/actions/init
-
-      - name: Create Neon Branch and Run Migrations
-        id: branch
-        uses: ./.github/actions/neon-branch
-        with:
-          neon-api-key: ${{ secrets.NEON_API_KEY }}
-          neon-project-id: ${{ vars.NEON_PROJECT_ID }}
-          branch-name: "preview-pr-${{ github.event.pull_request.number }}"
-          action: "create"
-
-  deploy-web:
-    runs-on: ubuntu-latest
-    needs: [build, database]
-    if: github.event_name == 'pull_request'
-    permissions:
-      pull-requests: write
-      deployments: write
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: turbo-build-${{ github.run_id }}
-          path: turbo/apps/
-
-      - name: Deploy Web to Vercel
-        id: deploy
-        uses: ./.github/actions/vercel-deploy
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ vars.VERCEL_TEAM_ID }}
-          vercel-project-id: ${{ vars.VERCEL_PROJECT_ID_WEB }}
-          environment: preview
-          environment-variables: |
-            DATABASE_URL=${{ needs.database.outputs.database-url }}
-          meta-branch: ${{ github.head_ref }}
-          meta-pr: ${{ github.event.pull_request.number }}
-          output-dir: turbo/apps/web/dist/
-
-  deploy-docs:
-    runs-on: ubuntu-latest
-    needs: [build]
-    if: github.event_name == 'pull_request' && vars.VERCEL_PROJECT_ID_DOCS != ''
-    permissions:
-      pull-requests: write
-      deployments: write
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: turbo-build-${{ github.run_id }}
-          path: turbo/apps/
-
-      - name: Deploy Docs to Vercel
-        id: deploy
-        uses: ./.github/actions/vercel-deploy
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ vars.VERCEL_TEAM_ID }}
-          vercel-project-id: ${{ vars.VERCEL_PROJECT_ID_DOCS }}
-          environment: preview
-          meta-branch: ${{ github.head_ref }}
-          meta-pr: ${{ github.event.pull_request.number }}
-          output-dir: turbo/apps/docs/dist/
