@@ -54,14 +54,6 @@ jobs:
       - name: Build applications
         run: cd turbo && pnpm build
 
-      - name: Check output
-        shell: bash
-        run: |
-          ls -alh turbo/apps/web/.next
-          ls -alh turbo/apps/docs/.next
-          ls -alh turbo/apps/cli/dist
-          find turbo/apps -name ".next" -o -name "dist" -type d | sort
-
       - name: Upload build artifacts
         id: upload
         uses: actions/upload-artifact@v4
@@ -69,11 +61,8 @@ jobs:
           name: turbo-build-${{ github.run_id }}
           include-hidden-files: true
           path: |
-            turbo/apps/web/.next/**
-            turbo/apps/docs/.next/**
-            turbo/apps/cli/dist/**
+            turbo/**/dist/**/*
           retention-days: 7
-          if-no-files-found: error
 
   database:
     runs-on: ubuntu-latest
