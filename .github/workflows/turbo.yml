@@ -106,7 +106,7 @@ jobs:
           name: turbo-build-${{ github.run_id }}-cli
 
       - name: Install CLI globally
-        run: cd turbo/apps/cli && npm install && npm link
+        run: cd turbo/apps/cli/dist && npm install && npm link
 
       - name: Run E2E Tests
         run: cd e2e && make test
