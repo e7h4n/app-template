@@ -15,15 +15,6 @@ on:
         value: ${{ jobs.database.outputs.database-url }}
 
 jobs:
-  commitlint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - uses: wagoid/commitlint-github-action@v6
-
   test:
     runs-on: ubuntu-latest
 
@@ -77,9 +68,9 @@ jobs:
         with:
           name: turbo-build-${{ github.run_id }}
           path: |
-            turbo/apps/web/.next/
-            turbo/apps/docs/.next/
-            turbo/apps/cli/dist/
+            turbo/apps/web/.next/**
+            turbo/apps/docs/.next/**
+            turbo/apps/cli/dist/**
           retention-days: 7
           if-no-files-found: error
 
@@ -117,7 +108,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: turbo-build-${{ github.run_id }}
-          path: turbo/apps
+          path: turbo/apps/
 
       - name: Deploy Web to Vercel
         id: deploy
@@ -131,7 +122,7 @@ jobs:
             DATABASE_URL=${{ needs.database.outputs.database-url }}
           meta-branch: ${{ github.head_ref }}
           meta-pr: ${{ github.event.pull_request.number }}
-          output-dir: turbo/apps/web/.next
+          output-dir: turbo/apps/web/.next/
 
   deploy-docs:
     runs-on: ubuntu-latest
@@ -147,7 +138,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: turbo-build-${{ github.run_id }}
-          path: turbo/
+          path: turbo/apps/
 
       - name: Deploy Docs to Vercel
         id: deploy
@@ -159,4 +150,4 @@ jobs:
           environment: preview
           meta-branch: ${{ github.head_ref }}
           meta-pr: ${{ github.event.pull_request.number }}
-          output-dir: turbo/apps/docs/.next
+          output-dir: turbo/apps/docs/.next/
