@@ -7,8 +7,13 @@ on:
       - main
 
 jobs:
+  build:
+    uses: ./.github/workflows/turbo.yml
+    secrets: inherit
+
   test:
     runs-on: ${{ matrix.os }}
+    needs: build
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
@@ -20,8 +25,11 @@ jobs:
 
       - uses: ./.github/actions/init
 
-      - name: Build CLI
-        run: cd turbo && pnpm turbo run build --filter=makita-cli
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.build.outputs.artifact-name }}
+          path: turbo/apps/
 
       - name: Install CLI globally
         run: cd turbo/apps/cli && npm link
