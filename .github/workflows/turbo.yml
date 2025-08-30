@@ -63,7 +63,7 @@ jobs:
       - name: Build applications
         run: cd turbo && pnpm build
 
-      - name: Upload build artifact
+      - name: Upload build artifacts
         id: upload
         uses: actions/upload-artifact@v4
         with:
@@ -73,6 +73,7 @@ jobs:
             turbo/apps/docs/.next/
             turbo/apps/cli/dist/
           retention-days: 7
+          if-no-files-found: error
 
   database:
     runs-on: ubuntu-latest
