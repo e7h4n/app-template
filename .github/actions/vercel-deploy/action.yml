@@ -27,9 +27,6 @@ inputs:
     description: "PR number for metadata"
     required: false
     default: ""
-  output-dir:
-    description: "Path to the build output directory (e.g., turbo/apps/web/dist/)"
-    required: true
 
 outputs:
   deployment-url:
@@ -64,7 +61,7 @@ runs:
       shell: bash
       run: |
         # Build deployment command
-        DEPLOY_CMD="vercel deploy --cwd ${{ inputs.output-dir }} --token=${{ inputs.vercel-token }}"
+        DEPLOY_CMD="vercel deploy --token=${{ inputs.vercel-token }}"
 
         # Add production flag if needed
         if [ "${{ inputs.environment }}" == "production" ]; then

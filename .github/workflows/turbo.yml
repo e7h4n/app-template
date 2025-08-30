@@ -40,29 +40,54 @@ jobs:
       - name: Test
         run: cd turbo && pnpm test
 
-  build:
+  build-cli:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/init
+
+      - name: Build Cli
+        run: cd turbo && pnpm -F makita-cli build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: turbo-build-${{ github.run_id }}-cli
+          path: turbo/apps/cli/dist
+          retention-days: 7
+
+  build-web:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/init
 
-      - name: Build applications
-        run: cd turbo && pnpm build
-
-      - name: Upload build artifacts
-        id: upload
-        uses: actions/upload-artifact@v4
+      - name: Build Web Application
+        uses: ./.github/actions/vercel-build
         with:
-          name: turbo-build-${{ github.run_id }}
-          include-hidden-files: true
-          path: |
-            turbo/apps/*/dist
-            turbo/apps/*/.next
-          retention-days: 7
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ vars.VERCEL_TEAM_ID }}
+          vercel-project-id: ${{ vars.VERCEL_PROJECT_ID_WEB }}
+          artifact-name: turbo-build-${{ github.run_id }}-web
+
+  build-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/init
+
+      - name: Build Web Application
+        uses: ./.github/actions/vercel-build
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ vars.VERCEL_TEAM_ID }}
+          vercel-project-id: ${{ vars.VERCEL_PROJECT_ID_DOCS }}
+          artifact-name: turbo-build-${{ github.run_id }}-docs
 
   e2e:
     runs-on: ${{ matrix.os }}
-    needs: build
+    needs: build-cli
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
@@ -78,8 +103,7 @@ jobs:
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: turbo-build-${{ github.run_id }}
-          path: turbo/apps/
+          name: turbo-build-${{ github.run_id }}-cli
 
       - name: Install CLI globally
         run: cd turbo/apps/cli && npm install && npm link
@@ -110,19 +134,16 @@ jobs:
   # Deploy web application
   deploy-web:
     runs-on: ubuntu-latest
-    needs: [build, database]
+    needs: [build-web, database]
     if: github.event_name == 'pull_request'
     permissions:
       pull-requests: write
       deployments: write
     steps:
-      - uses: actions/checkout@v4
-
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: turbo-build-${{ github.run_id }}
-          path: turbo/apps/
+          name: turbo-build-${{ github.run_id }}-web
 
       - name: Deploy Web to Vercel
         id: deploy
@@ -136,24 +157,20 @@ jobs:
             DATABASE_URL=${{ needs.database.outputs.database-url }}
           meta-branch: ${{ github.head_ref }}
           meta-pr: ${{ github.event.pull_request.number }}
-          output-dir: turbo/apps/web/.next/
 
   # Deploy docs application
   deploy-docs:
     runs-on: ubuntu-latest
-    needs: [build]
+    needs: [build-docs]
     if: github.event_name == 'pull_request' && vars.VERCEL_PROJECT_ID_DOCS != ''
     permissions:
       pull-requests: write
       deployments: write
     steps:
-      - uses: actions/checkout@v4
-
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: turbo-build-${{ github.run_id }}
-          path: turbo/apps/
+          name: turbo-build-${{ github.run_id }}-docs
 
       - name: Deploy Docs to Vercel
         id: deploy
@@ -165,4 +182,3 @@ jobs:
           environment: preview
           meta-branch: ${{ github.head_ref }}
           meta-pr: ${{ github.event.pull_request.number }}
-          output-dir: turbo/apps/docs/.next/
