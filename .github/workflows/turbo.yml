@@ -5,20 +5,11 @@ on:
   push:
     branches:
       - main
-  workflow_call:
-    outputs:
-      artifact-name:
-        description: "Name of the uploaded build artifact"
-        value: ${{ jobs.build.outputs.artifact-name }}
-      database-url:
-        description: "Database URL for preview environment"
-        value: ${{ jobs.database.outputs.database-url }}
 
 jobs:
   test:
     runs-on: ubuntu-latest
 
-    # Service containers to run with the job
     services:
       postgres:
         image: postgres:17-alpine
@@ -34,7 +25,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-
       - uses: ./.github/actions/init
 
       - run: npx -y @evilmartians/lefthook run pre-commit --all-files
@@ -48,7 +38,6 @@ jobs:
       artifact-name: ${{ steps.upload.outputs.artifact-id }}
     steps:
       - uses: actions/checkout@v4
-
       - uses: ./.github/actions/init
 
       - name: Build applications
@@ -64,7 +53,6 @@ jobs:
             turbo/apps/*/dist
           retention-days: 7
 
-  # E2E Tests
   e2e:
     runs-on: ${{ matrix.os }}
     needs: build
@@ -76,7 +64,9 @@ jobs:
         with:
           submodules: recursive
 
-      - uses: ./.github/actions/init
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
 
       - name: Download build artifacts
         uses: actions/download-artifact@v4
@@ -99,7 +89,6 @@ jobs:
       database-url: ${{ steps.branch.outputs.database-url }}
     steps:
       - uses: actions/checkout@v4
-
       - uses: ./.github/actions/init
 
       - name: Create Neon Branch and Run Migrations
@@ -109,7 +98,7 @@ jobs:
           neon-api-key: ${{ secrets.NEON_API_KEY }}
           neon-project-id: ${{ vars.NEON_PROJECT_ID }}
           branch-name: "preview-pr-${{ github.event.pull_request.number }}"
-          action: "create-and-migrate"
+          action: "create"
 
   # Deploy web application
   deploy-web:
