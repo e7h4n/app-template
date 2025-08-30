@@ -2,6 +2,52 @@
 
 A modern, production-ready monorepo template featuring TypeScript, Next.js, and automated CI/CD with comprehensive deployment tracking.
 
+## 🚀 Quick Start
+
+To create a new project from this template, copy and paste the following prompt to your preferred coding AI assistant:
+
+```
+I want to create a new project based on the Makita monorepo template. Please help me set up everything automatically.
+
+Here's what I need you to do:
+1. Ask me for my GitHub username and the new project name
+2. Ask me for all the required tokens and secrets (tell me where to get each one)
+3. Use GitHub CLI to create a new repository from the makita template
+4. Use Vercel API to create web and docs projects automatically
+5. Set up all repository secrets and variables using GitHub CLI
+6. Replace all "makita" references in the code with my project name
+7. Guide me through any additional setup steps
+
+Required GitHub repository secrets (use `gh secret set`):
+- NEON_API_KEY (get from: https://console.neon.tech/app/settings/api-keys)
+- NPM_TOKEN (get from: https://www.npmjs.com/settings/tokens)  
+- VERCEL_TOKEN (get from: https://vercel.com/account/tokens)
+- DATABASE_URL (production database connection string from Neon)
+
+Required GitHub repository variables (use `gh variable set`):
+- NEON_PROJECT_ID (from your Neon project dashboard)
+- VERCEL_TEAM_ID (from Vercel team settings, leave empty for personal account)
+- VERCEL_PROJECT_ID_WEB (will be auto-created via Vercel API)
+- VERCEL_PROJECT_ID_DOCS (will be auto-created via Vercel API)
+
+Template repository: https://github.com/e7h4n/makita
+
+Use Vercel API to automatically create:
+- Web project: POST https://api.vercel.com/v11/projects with name "{project-name}-web"
+- Docs project: POST https://api.vercel.com/v11/projects with name "{project-name}-docs"
+- Get project IDs and set as VERCEL_PROJECT_ID_WEB and VERCEL_PROJECT_ID_DOCS
+
+Please guide me through this process step by step, asking for one piece of information at a time and explaining what each token is used for.
+```
+
+After pasting this prompt, your coding AI will automatically:
+
+- Create the repository from this template
+- Set up Vercel projects for web and docs
+- Configure all required secrets and environment variables
+- Replace project names throughout the codebase
+- Set up the complete CI/CD pipeline
+
 ## 🚀 Features
 
 - **Type-Safe Monorepo**: Full TypeScript support with strict type checking across all packages
@@ -99,9 +145,9 @@ pnpm db:studio
 
 #### Repository Variables  
 - `NEON_PROJECT_ID`: Neon database project ID
-- `VERCEL_PROJECT_ID_WEB`: Vercel project ID for web app
-- `VERCEL_PROJECT_ID_DOCS`: Vercel project ID for docs (optional)
-- `VERCEL_TEAM_ID`: Vercel team identifier
+- `VERCEL_PROJECT_ID_WEB`: Vercel project ID for web app (auto-created via API)
+- `VERCEL_PROJECT_ID_DOCS`: Vercel project ID for docs (auto-created via API)
+- `VERCEL_TEAM_ID`: Vercel team identifier (optional, for team accounts)
 
 ### Deployment Targets
 - **Web App**: Automatically deployed to Vercel on PR merge
@@ -148,43 +194,6 @@ cd e2e && make test
 
 This project uses **pnpm** with workspace protocol for efficient package management and **Turbo** for optimized builds and caching.
 
-## 🚀 How to Use This Template
-
-To create a new project from this template, copy and paste the following prompt to your preferred coding AI assistant:
-
-```
-I want to create a new project based on the Makita monorepo template. Please help me set up everything step by step.
-
-Here's what I need you to do:
-1. Ask me for my GitHub username and the new project name
-2. Ask me for all the required tokens and secrets (tell me where to get each one)
-3. Use GitHub CLI to create a new repository from the makita template
-4. Set up all repository secrets and variables using GitHub CLI
-5. Replace all "makita" references in the code with my project name
-6. Guide me through any additional setup steps
-
-The required secrets and variables are:
-- NEON_API_KEY (get from: https://console.neon.tech/app/settings/api-keys)
-- NPM_TOKEN (get from: https://www.npmjs.com/settings/tokens)
-- VERCEL_TOKEN (get from: https://vercel.com/account/tokens)  
-- DATABASE_URL (production database connection string from Neon)
-- NEON_PROJECT_ID (from your Neon project dashboard)
-- VERCEL_PROJECT_ID_WEB (create Vercel project first, then get ID from project settings)
-- VERCEL_PROJECT_ID_DOCS (optional, only if you want to deploy docs)
-- VERCEL_TEAM_ID (from Vercel team settings, or leave empty for personal account)
-
-Template repository: https://github.com/e7h4n/makita
-
-Please guide me through this process step by step, asking for one piece of information at a time and explaining what each token is used for.
-```
-
-After pasting this prompt, your coding AI will guide you through the complete setup process, including:
-
-- Creating the repository
-- Setting up all required secrets and environment variables
-- Customizing the project with your chosen name
-- Configuring deployment pipelines
-- Setting up database connections
 
 ## 📄 License
 
