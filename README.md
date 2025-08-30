@@ -1,4 +1,4 @@
-# Makita
+# Makita Stack
 
 A modern, production-ready monorepo template featuring TypeScript, Next.js, and automated CI/CD with comprehensive deployment tracking.
 
