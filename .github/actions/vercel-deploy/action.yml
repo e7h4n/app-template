@@ -39,22 +39,20 @@ outputs:
 runs:
   using: "composite"
   steps:
+    - name: Start deployment
+      id: deployment
+      uses: bobheadxi/deployments@v1
+      with:
+        step: start
+        token: ${{ github.token }}
+        env: ${{ inputs.environment }}
+
     - name: Setup Vercel
       uses: ./.github/actions/vercel-setup
       with:
         vercel-token: ${{ inputs.vercel-token }}
         vercel-org-id: ${{ inputs.vercel-org-id }}
         vercel-project-id: ${{ inputs.vercel-project-id }}
-
-    - name: Start deployment
-      id: start-deployment
-      uses: bobheadxi/deployments@v1
-      if: github.event_name == 'pull_request' || github.event_name == 'push'
-      with:
-        step: start
-        token: ${{ github.token }}
-        env: ${{ inputs.environment }}
-        desc: Vercel deployment for ${{ github.ref_name }}
 
     - name: Deploy to Vercel
       id: deploy
@@ -97,23 +95,12 @@ runs:
         echo "url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
         echo "Deployment URL: $DEPLOYMENT_URL"
 
-    - name: Update deployment status - success
+    - name: Finish deployment
       uses: bobheadxi/deployments@v1
-      if: success() && steps.start-deployment.outputs.deployment_id
+      if: always()
       with:
         step: finish
         token: ${{ github.token }}
-        status: success
-        env: ${{ inputs.environment }}
+        status: ${{ job.status }}
         env_url: ${{ steps.deploy.outputs.url }}
-        deployment_id: ${{ steps.start-deployment.outputs.deployment_id }}
-
-    - name: Update deployment status - failure
-      uses: bobheadxi/deployments@v1
-      if: failure() && steps.start-deployment.outputs.deployment_id
-      with:
-        step: finish
-        token: ${{ github.token }}
-        status: failure
-        env: ${{ inputs.environment }}
-        deployment_id: ${{ steps.start-deployment.outputs.deployment_id }}
+        deployment_id: ${{ steps.deployment.outputs.deployment_id }}
