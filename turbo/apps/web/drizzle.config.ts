@@ -1,18 +1,14 @@
 import { defineConfig } from "drizzle-kit";
-import { config } from "dotenv";
+import { env } from "./src/env";
 
-config({ path: "./.env" });
-
-import { getEnvSchema } from "./src/env";
-
-const env = getEnvSchema();
+export const DRIZZLE_MIGRATE_OUT = "./src/db/migrations";
 
 export default defineConfig({
   schema: "./src/db/schema/*",
-  out: "./src/db/migrations",
+  out: DRIZZLE_MIGRATE_OUT,
   dialect: "postgresql",
   dbCredentials: {
-    url: env.DATABASE_URL,
+    url: env().DATABASE_URL,
   },
   verbose: true,
   strict: false,
