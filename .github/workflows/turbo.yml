@@ -149,7 +149,6 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: turbo-build-${{ github.sha }}-web
-          path: .vercel/output
 
       - name: Deploy Web to Vercel
         id: deploy
@@ -180,7 +179,6 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: turbo-build-${{ github.sha }}-docs
-          path: .vercel/output
 
       - name: Deploy Docs to Vercel
         id: deploy
