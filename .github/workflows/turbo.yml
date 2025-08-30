@@ -104,6 +104,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: turbo-build-${{ github.run_id }}-cli
+          path: turbo/apps/cli/dist
 
       - name: Install CLI globally
         run: cd turbo/apps/cli/dist && npm install && npm link
@@ -146,6 +147,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: turbo-build-${{ github.run_id }}-web
+          path: .vercel/output
 
       - name: Deploy Web to Vercel
         id: deploy
@@ -175,6 +177,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: turbo-build-${{ github.run_id }}-docs
+          path: .vercel/output
 
       - name: Deploy Docs to Vercel
         id: deploy
