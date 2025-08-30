@@ -16,7 +16,8 @@ Here's what I need you to do:
 4. Use Vercel API to create web and docs projects automatically
 5. Set up all repository secrets and variables using GitHub CLI
 6. Replace all "makita" references in the code with my project name
-7. Guide me through any additional setup steps
+7. Initialize git repository with initial commit: `git add . && git commit -m "init commit" && git push`
+8. Guide me through any additional setup steps
 
 Required GitHub repository secrets (use `gh secret set`):
 - NEON_API_KEY (get from: https://console.neon.tech/app/settings/api-keys)
@@ -33,9 +34,27 @@ Required GitHub repository variables (use `gh variable set`):
 Template repository: https://github.com/e7h4n/makita
 
 Use Vercel API to automatically create:
-- Web project: POST https://api.vercel.com/v11/projects with name "{project-name}-web"
-- Docs project: POST https://api.vercel.com/v11/projects with name "{project-name}-docs"
-- Get project IDs and set as VERCEL_PROJECT_ID_WEB and VERCEL_PROJECT_ID_DOCS
+- Web project: POST https://api.vercel.com/v11/projects with configuration:
+  ```json
+  {
+    "name": "{project-name}-web",
+    "rootDirectory": "turbo/apps/web",
+    "buildCommand": "turbo build",
+    "framework": "nextjs",
+    "commandForIgnoringBuildStep": "echo 'Ignored Build Step - builds are handled by GitHub Actions'"
+  }
+  ```
+- Docs project: POST https://api.vercel.com/v11/projects with configuration:
+  ```json
+  {
+    "name": "{project-name}-docs", 
+    "rootDirectory": "turbo/apps/docs",
+    "buildCommand": "turbo build",
+    "framework": "nextjs",
+    "commandForIgnoringBuildStep": "echo 'Ignored Build Step - builds are handled by GitHub Actions'"
+  }
+  ```
+- Get project IDs from responses and set as VERCEL_PROJECT_ID_WEB and VERCEL_PROJECT_ID_DOCS
 
 Please guide me through this process step by step, asking for one piece of information at a time and explaining what each token is used for.
 ```
@@ -43,9 +62,10 @@ Please guide me through this process step by step, asking for one piece of infor
 After pasting this prompt, your coding AI will automatically:
 
 - Create the repository from this template
-- Set up Vercel projects for web and docs
+- Set up Vercel projects for web and docs with proper monorepo configuration
 - Configure all required secrets and environment variables
 - Replace project names throughout the codebase
+- Initialize git repository with initial commit and push
 - Set up the complete CI/CD pipeline
 
 ## 🚀 Features
