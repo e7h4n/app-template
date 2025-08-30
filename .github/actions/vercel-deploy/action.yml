@@ -58,13 +58,19 @@ runs:
         # Initialize Vercel project configuration
         mkdir -p .vercel
         echo '{"orgId":"${{ inputs.vercel-org-id }}","projectId":"${{ inputs.vercel-project-id }}"}' > .vercel/project.json
+        vercel pull --token=${{ inputs.vercel-token }}
+
+    - name: Build
+      shell: bash
+      run: |
+        vercel build --prod --token=${{ inputs.vercel-token }}
 
     - name: Deploy to Vercel
       id: deploy
       shell: bash
       run: |
         # Build deployment command
-        DEPLOY_CMD="vercel deploy --token=${{ inputs.vercel-token }}"
+        DEPLOY_CMD="vercel deploy --prebuilt --token=${{ inputs.vercel-token }}"
 
         # Add production flag if needed
         if [ "${{ inputs.environment }}" == "production" ]; then
