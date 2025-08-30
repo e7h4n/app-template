@@ -64,7 +64,7 @@ runs:
         mkdir -p .vercel
         echo '{"orgId":"'$VERCEL_ORG_ID'","projectId":"'$VERCEL_PROJECT_ID'"}' > .vercel/project.json
 
-        vercel pull --token=$${ inputs.vercel-token }} --environment=${{ inputs.environment }}
+        vercel pull --token=${ inputs.vercel-token }} --environment=${{ inputs.environment }}
 
         # Build deployment command
         DEPLOY_CMD="vercel deploy --token=$VERCEL_TOKEN"
