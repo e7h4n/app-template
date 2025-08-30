@@ -1,4 +1,4 @@
-name: Turbo
+name: General
 
 on:
   pull_request:
