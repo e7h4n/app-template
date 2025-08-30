@@ -28,7 +28,7 @@ inputs:
     required: false
     default: ""
   output-dir:
-    description: "Path to the build output directory (e.g., turbo/apps/web/.next/)"
+    description: "Path to the build output directory (e.g., turbo/apps/web/dist/)"
     required: true
 
 outputs:

@@ -112,7 +112,7 @@ jobs:
             DATABASE_URL=${{ needs.database.outputs.database-url }}
           meta-branch: ${{ github.head_ref }}
           meta-pr: ${{ github.event.pull_request.number }}
-          output-dir: turbo/apps/web/.next/
+          output-dir: turbo/apps/web/dist/
 
   deploy-docs:
     runs-on: ubuntu-latest
@@ -140,4 +140,4 @@ jobs:
           environment: preview
           meta-branch: ${{ github.head_ref }}
           meta-pr: ${{ github.event.pull_request.number }}
-          output-dir: turbo/apps/docs/.next/
+          output-dir: turbo/apps/docs/dist/

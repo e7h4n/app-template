@@ -10,9 +10,10 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
+    "dist/types/**/*.ts",
     "next-env.d.ts",
     "next.config.js",
-    ".next/types/**/*.ts"
+    "dist/types/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }
