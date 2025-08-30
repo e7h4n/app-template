@@ -27,18 +27,23 @@ inputs:
     description: "PR number for metadata"
     required: false
     default: ""
-
-outputs:
-  deployment-url:
-    description: "The URL of the deployment"
-    value: ${{ steps.deploy.outputs.url }}
-  deployment-id:
-    description: "The GitHub deployment ID"
-    value: ${{ steps.start-deployment.outputs.deployment_id }}
+  deployment-env:
+    description: "Deployment environment name (e.g., web, docs)"
+    required: true
 
 runs:
   using: "composite"
   steps:
+    - name: Start deployment
+      id: deployment
+      uses: bobheadxi/deployments@v1
+      with:
+        step: start
+        token: ${{ github.token }}
+        env: ${{ inputs.environment == 'production' && format('{0}/production', inputs.deployment-env) || format('{0}/preview/{1}', inputs.deployment-env, inputs.meta-branch || github.head_ref || github.ref_name) }}
+        ref: ${{ github.head_ref || github.ref }}
+        desc: Deploying ${{ inputs.environment }} environment
+
     - name: Setup Vercel
       uses: ./.github/actions/vercel-setup
       with:
@@ -46,22 +51,12 @@ runs:
         vercel-org-id: ${{ inputs.vercel-org-id }}
         vercel-project-id: ${{ inputs.vercel-project-id }}
 
-    - name: Start deployment
-      id: start-deployment
-      uses: bobheadxi/deployments@v1
-      if: github.event_name == 'pull_request' || github.event_name == 'push'
-      with:
-        step: start
-        token: ${{ github.token }}
-        env: ${{ inputs.environment }}
-        desc: Vercel deployment for ${{ github.ref_name }}
-
     - name: Deploy to Vercel
       id: deploy
       shell: bash
       run: |
         # Build deployment command
-        DEPLOY_CMD="vercel deploy --token=${{ inputs.vercel-token }}"
+        DEPLOY_CMD="vercel deploy --prebuilt --token=${{ inputs.vercel-token }}"
 
         # Add production flag if needed
         if [ "${{ inputs.environment }}" == "production" ]; then
@@ -97,23 +92,13 @@ runs:
         echo "url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
         echo "Deployment URL: $DEPLOYMENT_URL"
 
-    - name: Update deployment status - success
+    - name: Finish deployment
       uses: bobheadxi/deployments@v1
-      if: success() && steps.start-deployment.outputs.deployment_id
+      if: always()
       with:
         step: finish
         token: ${{ github.token }}
-        status: success
-        env: ${{ inputs.environment }}
+        status: ${{ job.status }}
+        env: ${{ steps.deployment.outputs.env }}
         env_url: ${{ steps.deploy.outputs.url }}
-        deployment_id: ${{ steps.start-deployment.outputs.deployment_id }}
-
-    - name: Update deployment status - failure
-      uses: bobheadxi/deployments@v1
-      if: failure() && steps.start-deployment.outputs.deployment_id
-      with:
-        step: finish
-        token: ${{ github.token }}
-        status: failure
-        env: ${{ inputs.environment }}
-        deployment_id: ${{ steps.start-deployment.outputs.deployment_id }}
+        deployment_id: ${{ steps.deployment.outputs.deployment_id }}

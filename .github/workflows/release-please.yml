@@ -1,9 +1,11 @@
 name: release-please
 
 on:
-  push:
-    branches:
-      - main
+  workflow_run:
+    workflows: ["Turbo"]
+    branches: ["main"]
+    types:
+      - completed
 
 permissions:
   contents: write
@@ -13,6 +15,7 @@ permissions:
 jobs:
   release-please:
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     outputs:
       release_created: ${{ steps.release.outputs.release_created }}
       cli_release_created: ${{ steps.release.outputs['turbo/apps/cli--release_created'] }}
@@ -25,10 +28,32 @@ jobs:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
 
-  push-database-schema:
+  publish-npm:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.cli_release_created == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: turbo-build-${{ github.event.workflow_run.head_sha }}-cli
+          path: turbo/apps/cli/dist
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+          registry-url: "https://registry.npmjs.org"
+
+      - run: cd turbo/apps/cli/dist && npm publish --access public --no-git-checks
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  deploy-web:
     needs: release-please
     if: ${{ needs.release-please.outputs.web_release_created == 'true' }}
     runs-on: ubuntu-latest
+    permissions:
+      deployments: write
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/init
@@ -36,24 +61,48 @@ jobs:
       - name: Push database schema
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-        run: cd turbo/apps/web && pnpm db:push
+        run: cd turbo/apps/web && pnpm db:migrate
 
-  publish-npm:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: turbo-build-${{ github.event.workflow_run.head_sha }}-web
+          path: .vercel/output
+
+      - name: Deploy Web to Vercel Production
+        id: deploy
+        uses: ./.github/actions/vercel-deploy
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ vars.VERCEL_TEAM_ID }}
+          vercel-project-id: ${{ vars.VERCEL_PROJECT_ID_WEB }}
+          environment: production
+          deployment-env: web
+          environment-variables: |
+            DATABASE_URL=${{ secrets.DATABASE_URL }}
+
+  deploy-docs:
     needs: release-please
-    if: ${{ needs.release-please.outputs.cli_release_created == 'true' }}
+    if: ${{ needs.release-please.outputs.release_created == 'true' && vars.VERCEL_PROJECT_ID_DOCS != '' }}
     runs-on: ubuntu-latest
+    permissions:
+      deployments: write
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/init
 
-      # Setup .npmrc file to publish to npm
-      - uses: actions/setup-node@v4
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
         with:
-          node-version: "22.x"
-          registry-url: "https://registry.npmjs.org"
+          name: turbo-build-${{ github.event.workflow_run.head_sha }}-docs
+          path: .vercel/output
 
-      - run: cd turbo && pnpm turbo run build --filter=makita-cli
-
-      - run: cd turbo/apps/cli/dist && npm publish --access public --no-git-checks
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Deploy Docs to Vercel Production
+        id: deploy
+        uses: ./.github/actions/vercel-deploy
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ vars.VERCEL_TEAM_ID }}
+          vercel-project-id: ${{ vars.VERCEL_PROJECT_ID_DOCS }}
+          environment: production
+          deployment-env: docs

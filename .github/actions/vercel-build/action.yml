@@ -39,5 +39,8 @@ runs:
       with:
         name: ${{ inputs.artifact-name }}
         include-hidden-files: true
-        path: .vercel/output
+        path: |
+          .vercel/output
+          turbo/apps/*/.next
         retention-days: 7
+        overwrite: true

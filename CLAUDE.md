@@ -97,6 +97,48 @@ export async function GET() {
 - Address TypeScript errors properly, don't ignore them
 - Unused variables should be removed, not ignored
 
+## Commit Message Guidelines
+
+**All commit messages must follow Conventional Commits format.** This ensures consistent commit history and enables automated versioning.
+
+### Format
+```
+<type>[optional scope]: <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
+### Required Rules:
+- **Type must be lowercase** - Use `feat:`, not `Feat:` or `FEAT:`
+- **Description must start with lowercase** - Use `add new feature`, not `Add new feature`  
+- **No period at the end** - Use `fix user login`, not `fix user login.`
+- **Keep title under 100 characters** - Ensure the entire first line is concise
+- **Use imperative mood** - Use `add`, not `added` or `adds`
+
+### Types:
+- `feat:` New feature
+- `fix:` Bug fix  
+- `docs:` Documentation changes
+- `style:` Code style changes (formatting, semicolons, etc)
+- `refactor:` Code refactoring
+- `test:` Test additions or changes
+- `chore:` Build process or auxiliary tool changes
+- `ci:` CI configuration changes
+- `perf:` Performance improvements
+- `build:` Build system changes
+- `revert:` Revert previous commit
+
+### Examples:
+- ✅ `feat: add user authentication system`
+- ✅ `fix: resolve database connection timeout`
+- ✅ `docs(api): update endpoint documentation`
+- ✅ `ci: optimize release workflow dependencies`
+- ❌ `Fix: Resolve database connection timeout.` (wrong case, has period)
+- ❌ `added user auth` (missing type, wrong tense)
+- ❌ `feat: Add user authentication system with OAuth2 integration, JWT tokens, refresh mechanism, and comprehensive error handling` (too long)
+
 ## Pre-Commit Checks
 
 **All code must pass these checks before committing.** Run these commands from the `/turbo` directory to ensure code quality:
@@ -111,4 +153,5 @@ export async function GET() {
 1. Run all checks to ensure code quality
 2. Fix any issues that are found
 3. Never commit code that fails any of these checks
-4. These checks help maintain the high standards defined in our design principles
+4. Use proper conventional commit message format
+5. These checks help maintain the high standards defined in our design principles

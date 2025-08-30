@@ -15,8 +15,8 @@ jobs:
         with:
           neon-api-key: ${{ secrets.NEON_API_KEY }}
           neon-project-id: ${{ vars.NEON_PROJECT_ID }}
-          branch-name: "preview-pr-${{ github.event.pull_request.number }}"
-          action: "delete"
+          branch-name: "${{ github.event.pull_request.head.ref }}"
+          action: "cleanup"
 
   cleanup-deployments:
     runs-on: ubuntu-latest
