@@ -1,4 +1,4 @@
-# Makita
+# Makita Stack
 
 A modern, production-ready monorepo template featuring TypeScript, Next.js, and automated CI/CD with comprehensive deployment tracking.
 
@@ -10,19 +10,39 @@ To create a new project from this template, copy and paste the following prompt 
 I want to create a new project based on the Makita monorepo template. Please help me set up everything automatically.
 
 Here's what I need you to do:
-1. Ask me for my GitHub username and the new project name
-2. Ask me for all the required tokens and secrets (tell me where to get each one)
-3. Use GitHub CLI to create a new repository from the makita template
-4. Use Vercel API to create web and docs projects automatically
-5. Set up all repository secrets and variables using GitHub CLI
-6. Replace all "makita" references in the code with my project name
-7. Guide me through any additional setup steps
+1. First, verify GitHub CLI installation and authentication:
+   - Check if `gh` is installed by running `gh --version`
+   - If not installed, provide installation instructions:
+     - macOS: `brew install gh`
+     - Windows: `winget install --id GitHub.cli` or download from https://cli.github.com/
+     - Linux: Follow instructions at https://github.com/cli/cli#installation
+   - Check authentication status with `gh auth status`
+   - If not authenticated, guide through: `gh auth login`
+   - Only proceed after confirming successful authentication
+2. Ask me for my GitHub username and the new project name
+3. Ask me for all the required tokens and secrets (tell me where to get each one)
+4. Use GitHub CLI to create a new repository from the makita template
+5. Use Vercel API to create web and docs projects automatically
+6. Set up all repository secrets and variables using GitHub CLI
+7. Replace all "makita" references in the code with my project name
+8. If NPM_TOKEN is not provided, remove CLI package and related configurations:
+   - Delete turbo/apps/cli directory
+   - Remove CLI-related jobs from .github/workflows/turbo.yml and .github/workflows/release-please.yml
+   - Remove CLI-related configurations from lefthook.yml and other config files
+9. Install dependencies and initialize git repository:
+   ```bash
+   cd turbo && pnpm install
+   cd .. && git add . && git commit -m "init commit" && git push
+   ```
+10. Guide me through any additional setup steps
 
 Required GitHub repository secrets (use `gh secret set`):
 - NEON_API_KEY (get from: https://console.neon.tech/app/settings/api-keys)
-- NPM_TOKEN (get from: https://www.npmjs.com/settings/tokens)  
 - VERCEL_TOKEN (get from: https://vercel.com/account/tokens)
 - DATABASE_URL (production database connection string from Neon)
+
+Optional GitHub repository secrets (only if you want to publish CLI package):
+- NPM_TOKEN (get from: https://www.npmjs.com/settings/tokens) - if not provided, CLI package will be removed
 
 Required GitHub repository variables (use `gh variable set`):
 - NEON_PROJECT_ID (from your Neon project dashboard)
@@ -60,10 +80,13 @@ Please guide me through this process step by step, asking for one piece of infor
 
 After pasting this prompt, your coding AI will automatically:
 
+- Verify GitHub CLI installation and authentication status
 - Create the repository from this template
-- Set up Vercel projects for web and docs
+- Set up Vercel projects for web and docs with proper monorepo configuration
 - Configure all required secrets and environment variables
 - Replace project names throughout the codebase
+- Optionally remove CLI package and related configurations (if NPM_TOKEN not provided)
+- Install dependencies (pnpm install) and initialize git repository with commit and push
 - Set up the complete CI/CD pipeline
 
 ## 🚀 Features
@@ -153,6 +176,49 @@ pnpm db:studio
 - **Release Management**: Automated releases with release-please
 - **Multi-Platform Testing**: Ubuntu and macOS E2E testing
 
+### 🔄 Development Workflow
+
+#### Pull Request Workflow
+When you create a pull request, the following happens automatically:
+
+1. **🗃️ Database Branch Creation**: 
+   - A new Neon database branch is created with the name `preview/{branch-name}`
+   - Database migrations are applied to the new branch
+   - A unique database connection string is generated
+
+2. **🌐 Preview Environment Deployment**:
+   - Web and docs applications are built and deployed to Vercel preview environments
+   - Each deployment gets a unique URL: `{project-name}-web-{branch}.vercel.app`
+   - Preview environments use the isolated database branch
+
+3. **📊 Deployment Status**:
+   - All deployment statuses are tracked and visible in the PR
+   - Links to preview environments and database console are provided
+   - GitHub deployment status shows: `web/preview/{branch}`, `docs/preview/{branch}`, `neon/preview/{branch}`
+
+#### Production Release Workflow
+Production deployments follow a controlled release process:
+
+1. **🔀 PR Merge**: When your feature PR is merged to `main`, no automatic production deployment occurs
+
+2. **📋 Release PR Creation**: 
+   - `release-please` bot automatically creates or updates a release PR
+   - The release PR contains version bumps and changelog updates
+   - Multiple feature merges accumulate in a single release PR
+
+3. **🚀 Production Release**: When the release PR is merged:
+   - **Version Update**: Package versions are bumped according to conventional commits
+   - **Database Migration**: Production database migrations are applied
+   - **Vercel Deployment**: Web and docs apps are deployed to production
+   - **NPM Publishing**: CLI package is published to NPM (if configured)
+   - **GitHub Release**: A new GitHub release is created with changelog
+
+This workflow ensures:
+- ✅ Safe, controlled production deployments
+- ✅ Proper version management and changelog generation
+- ✅ Database migration safety with preview branches
+- ✅ No accidental production deployments from feature branches
+
 ### Environment Configuration
 
 #### Repository Secrets
@@ -168,9 +234,9 @@ pnpm db:studio
 - `VERCEL_TEAM_ID`: Vercel team identifier (optional, for team accounts)
 
 ### Deployment Targets
-- **Web App**: Automatically deployed to Vercel on PR merge
-- **CLI Package**: Published to NPM on release
-- **Documentation**: Deployed to Vercel (if configured)
+- **Web App**: Automatically deployed to Vercel on release
+- **CLI Package**: Published to NPM on release (optional, if NPM_TOKEN provided)
+- **Documentation**: Deployed to Vercel on release (if configured)
 
 ## 🧪 Testing
 
