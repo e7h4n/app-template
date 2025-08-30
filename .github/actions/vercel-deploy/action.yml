@@ -37,7 +37,7 @@ runs:
       with:
         step: start
         token: ${{ github.token }}
-        env: ${{ inputs.environment }}
+        env: ${{ inputs.environment == 'production' && 'production' || format('{0}-{1}', inputs.environment, inputs.meta-branch || github.head_ref || github.ref_name) }}
         desc: Deploying ${{ inputs.environment }} environment
 
     - name: Setup Vercel
@@ -95,6 +95,6 @@ runs:
         step: finish
         token: ${{ github.token }}
         status: ${{ job.status }}
-        env: ${{ inputs.environment }}
+        env: ${{ inputs.environment == 'production' && 'production' || format('{0}-{1}', inputs.environment, inputs.meta-branch || github.head_ref || github.ref_name) }}
         env_url: ${{ steps.deploy.outputs.url }}
         deployment_id: ${{ steps.deployment.outputs.deployment_id }}
