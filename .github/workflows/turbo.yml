@@ -118,6 +118,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: test
     if: github.event_name == 'pull_request'
+    permissions:
+      deployments: write
     outputs:
       database-url: ${{ steps.branch.outputs.database-url }}
     steps:
@@ -130,7 +132,7 @@ jobs:
         with:
           neon-api-key: ${{ secrets.NEON_API_KEY }}
           neon-project-id: ${{ vars.NEON_PROJECT_ID }}
-          branch-name: "preview-pr-${{ github.event.pull_request.number }}"
+          branch-name: "${{ github.head_ref }}"
           action: "create"
 
   # Deploy web application
@@ -158,6 +160,7 @@ jobs:
           vercel-org-id: ${{ vars.VERCEL_TEAM_ID }}
           vercel-project-id: ${{ vars.VERCEL_PROJECT_ID_WEB }}
           environment: preview
+          deployment-env: web
           environment-variables: |
             DATABASE_URL=${{ needs.database.outputs.database-url }}
           meta-branch: ${{ github.head_ref }}
@@ -188,5 +191,6 @@ jobs:
           vercel-org-id: ${{ vars.VERCEL_TEAM_ID }}
           vercel-project-id: ${{ vars.VERCEL_PROJECT_ID_DOCS }}
           environment: preview
+          deployment-env: docs
           meta-branch: ${{ github.head_ref }}
           meta-pr: ${{ github.event.pull_request.number }}

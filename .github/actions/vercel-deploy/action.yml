@@ -27,6 +27,9 @@ inputs:
     description: "PR number for metadata"
     required: false
     default: ""
+  deployment-env:
+    description: "Deployment environment name (e.g., web, docs)"
+    required: true
 
 runs:
   using: "composite"
@@ -37,7 +40,7 @@ runs:
       with:
         step: start
         token: ${{ github.token }}
-        env: ${{ inputs.environment == 'production' && 'production' || format('{0}/{1}', inputs.environment, inputs.meta-branch || github.head_ref || github.ref_name) }}
+        env: ${{ inputs.environment == 'production' && format('{0}/production', inputs.deployment-env) || format('{0}/preview/{1}', inputs.deployment-env, inputs.meta-branch || github.head_ref || github.ref_name) }}
         ref: ${{ github.head_ref || github.ref }}
         desc: Deploying ${{ inputs.environment }} environment
 
