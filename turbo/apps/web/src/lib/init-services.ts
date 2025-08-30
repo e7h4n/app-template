@@ -1,7 +1,7 @@
 import { Pool } from "pg";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { schema } from "../db/db";
-import { getEnvSchema, type Env } from "../env";
+import { env, type Env } from "../env";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import type { Services } from "../types/global";
 
@@ -33,7 +33,7 @@ export function initServices(): void {
   _services = {
     get env() {
       if (!_env) {
-        _env = getEnvSchema();
+        _env = env();
       }
       return _env;
     },

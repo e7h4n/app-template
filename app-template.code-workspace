@@ -26,6 +26,6 @@
     }
   ],
   "extensions": {
-    "recommendations": ["esbenp.prettier-vscode"]
+    "recommendations": ["esbenp.prettier-vscode", "anthropic.claude-code"]
   }
 }

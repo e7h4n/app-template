@@ -1,42 +1,56 @@
-name: 'Vercel Deploy'
-description: 'Deploy to Vercel with reusable configuration'
-author: 'Your Organization'
+name: "Vercel Deploy"
+description: "Deploy to Vercel with reusable configuration"
 
 inputs:
   vercel-token:
-    description: 'Vercel authentication token'
+    description: "Vercel authentication token"
     required: true
   vercel-org-id:
-    description: 'Vercel organization ID'
+    description: "Vercel organization ID"
     required: true
   vercel-project-id:
-    description: 'Vercel project ID'
+    description: "Vercel project ID"
     required: true
   environment:
-    description: 'Deployment environment (preview or production)'
+    description: "Deployment environment (preview or production)"
     required: false
-    default: 'preview'
+    default: "preview"
   environment-variables:
-    description: 'Environment variables for deployment (key=value pairs, one per line)'
+    description: "Environment variables for deployment (key=value pairs, one per line)"
     required: false
-    default: ''
+    default: ""
   meta-branch:
-    description: 'Branch name for metadata'
+    description: "Branch name for metadata"
     required: false
-    default: ''
+    default: ""
   meta-pr:
-    description: 'PR number for metadata'
+    description: "PR number for metadata"
     required: false
-    default: ''
+    default: ""
 
 outputs:
   deployment-url:
-    description: 'The URL of the deployment'
+    description: "The URL of the deployment"
     value: ${{ steps.deploy.outputs.url }}
 
 runs:
-  using: 'composite'
+  using: "composite"
   steps:
+    - name: Install Vercel CLI
+      if: github.event.action != 'closed'
+      run: |
+        # Check if Vercel CLI is installed, install if not
+        if ! command -v vercel &> /dev/null; then
+          echo "Vercel CLI not found, installing..."
+          npm install -g vercel@latest
+        else
+          echo "Vercel CLI already installed"
+        fi
+
+        # Output Vercel version
+        echo "Vercel CLI version:"
+        vercel --version
+
     - name: Deploy to Vercel
       id: deploy
       shell: bash
@@ -45,33 +59,27 @@ runs:
         VERCEL_PROJECT_ID: ${{ inputs.vercel-project-id }}
         VERCEL_TOKEN: ${{ inputs.vercel-token }}
       run: |
-        # Ensure Vercel CLI is installed
-        if ! command -v vercel &> /dev/null; then
-          echo "Installing Vercel CLI..."
-          npm install -g vercel@latest
-        fi
-        
         # Initialize Vercel project configuration
         mkdir -p .vercel
         echo '{"orgId":"'$VERCEL_ORG_ID'","projectId":"'$VERCEL_PROJECT_ID'"}' > .vercel/project.json
-        
+
         # Build deployment command
         DEPLOY_CMD="vercel deploy --token=$VERCEL_TOKEN"
-        
+
         # Add production flag if needed
         if [ "${{ inputs.environment }}" == "production" ]; then
           DEPLOY_CMD="$DEPLOY_CMD --prod"
         fi
-        
+
         # Add metadata if provided
         if [ -n "${{ inputs.meta-branch }}" ]; then
           DEPLOY_CMD="$DEPLOY_CMD --meta branch=${{ inputs.meta-branch }}"
         fi
-        
+
         if [ -n "${{ inputs.meta-pr }}" ]; then
           DEPLOY_CMD="$DEPLOY_CMD --meta pr=${{ inputs.meta-pr }}"
         fi
-        
+
         # Add environment variables if provided
         if [ -n "${{ inputs.environment-variables }}" ]; then
           while IFS= read -r line; do
@@ -83,11 +91,11 @@ runs:
             fi
           done <<< "${{ inputs.environment-variables }}"
         fi
-        
+
         # Execute deployment and capture URL
         echo "Executing deployment..."
         DEPLOYMENT_URL=$(eval $DEPLOY_CMD)
-        
+
         # Output the deployment URL
         echo "url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
         echo "Deployment URL: $DEPLOYMENT_URL"

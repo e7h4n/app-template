@@ -1,11 +1,10 @@
 import { createEnv } from "@t3-oss/env-nextjs";
+import { config } from "dotenv";
 import { z } from "zod";
 
-/**
- * Environment configuration schema
- * Call this function to get validated environment variables
- */
-export function getEnvSchema() {
+function initEnv() {
+  config({ path: "./.env" });
+
   return createEnv({
     server: {
       DATABASE_URL: z.string().min(1),
@@ -13,18 +12,27 @@ export function getEnvSchema() {
         .enum(["development", "test", "production"])
         .default("development"),
     },
-    client: {
-      // Add client-side environment variables here when needed
-      // NEXT_PUBLIC_API_URL: z.string().url(),
-    },
+    client: {},
     runtimeEnv: {
       DATABASE_URL: process.env.DATABASE_URL,
       NODE_ENV: process.env.NODE_ENV,
     },
-    skipValidation: !!process.env.SKIP_ENV_VALIDATION,
     emptyStringAsUndefined: true,
   });
 }
 
+/**
+ * Environment configuration schema
+ * Call this function to get validated environment variables
+ */
+let _env: ReturnType<typeof initEnv> | undefined;
+export function env() {
+  if (!_env) {
+    _env = initEnv();
+  }
+
+  return _env;
+}
+
 // Export type for type inference
-export type Env = ReturnType<typeof getEnvSchema>;
+export type Env = ReturnType<typeof env>;
