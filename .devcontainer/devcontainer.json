@@ -9,7 +9,8 @@
     "ghcr.io/devcontainers/features/github-cli:1": {},
     "ghcr.io/devcontainers-extra/features/lefthook-asdf:1": {},
     "ghcr.io/itsmechlark/features/postgresql:1": {},
-    "ghcr.io/guiyomh/features/vim:0": {}
+    "ghcr.io/guiyomh/features/vim:0": {},
+    "ghcr.io/devcontainers-extra/features/ripgrep:1": {}
   },
   "forwardPorts": [4983],
   "remoteEnv": {

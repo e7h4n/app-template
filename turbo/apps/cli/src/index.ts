@@ -6,14 +6,14 @@ const program = new Command();
 
 program
   .name("makita-cli")
-  .description("App CLI - A modern build tool")
+  .description("Makita CLI - A modern build tool")
   .version("0.1.0");
 
 program
   .command("hello")
   .description("Say hello from the App")
   .action(() => {
-    console.log(chalk.blue("Welcome to the App CLI!"));
+    console.log(chalk.blue("Welcome to the Makita CLI!"));
     console.log(chalk.green(`Core says: ${FOO}`));
   });
 
