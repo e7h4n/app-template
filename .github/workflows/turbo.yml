@@ -57,6 +57,7 @@ jobs:
           include-hidden-files: true
           path: |
             turbo/apps/*/dist
+            turbo/apps/*/.next
           retention-days: 7
 
   e2e:
@@ -135,7 +136,7 @@ jobs:
             DATABASE_URL=${{ needs.database.outputs.database-url }}
           meta-branch: ${{ github.head_ref }}
           meta-pr: ${{ github.event.pull_request.number }}
-          output-dir: turbo/apps/web/dist/
+          output-dir: turbo/apps/web/.next/
 
   # Deploy docs application
   deploy-docs:
@@ -164,4 +165,4 @@ jobs:
           environment: preview
           meta-branch: ${{ github.head_ref }}
           meta-pr: ${{ github.event.pull_request.number }}
-          output-dir: turbo/apps/docs/dist/
+          output-dir: turbo/apps/docs/.next/

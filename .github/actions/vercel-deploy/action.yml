@@ -42,29 +42,12 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - name: Install Vercel CLI
-      shell: bash
-      run: |
-        # Check if Vercel CLI is installed, install if not
-        if ! command -v vercel &> /dev/null; then
-          echo "Vercel CLI not found, installing..."
-          npm install -g vercel@latest
-        else
-          echo "Vercel CLI already installed"
-        fi
-
-        # Output Vercel version
-        echo "Vercel CLI version:"
-        vercel --version
-
-    - name: Prepare Vercel configuration
-      shell: bash
-      run: |
-        # Initialize Vercel project configuration
-        mkdir -p .vercel
-        echo '{"orgId":"${{ inputs.vercel-org-id }}","projectId":"${{ inputs.vercel-project-id }}"}' > .vercel/project.json
-        pwd
-        cat .vercel/project.json
+    - name: Setup Vercel
+      uses: ./.github/actions/vercel-setup
+      with:
+        vercel-token: ${{ inputs.vercel-token }}
+        vercel-org-id: ${{ inputs.vercel-org-id }}
+        vercel-project-id: ${{ inputs.vercel-project-id }}
 
     - name: Start deployment
       id: start-deployment
@@ -80,10 +63,8 @@ runs:
       id: deploy
       shell: bash
       run: |
-        cp -r "${{ inputs.output-dir }}" .vercel/output
-
         # Build deployment command
-        DEPLOY_CMD="vercel deploy --prebuilt --token=${{ inputs.vercel-token }}"
+        DEPLOY_CMD="vercel deploy --cwd ${{ inputs.output-dir }} --token=${{ inputs.vercel-token }}"
 
         # Add production flag if needed
         if [ "${{ inputs.environment }}" == "production" ]; then
