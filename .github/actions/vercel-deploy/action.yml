@@ -66,21 +66,6 @@ runs:
         pwd
         cat .vercel/project.json
 
-    - name: Copy build output to Vercel output directory
-      shell: bash
-      run: |
-        # Copy build output to .vercel/output for deployment
-        if [ -d "${{ inputs.output-dir }}" ]; then
-          echo "Copying build output from ${{ inputs.output-dir }} to .vercel/output"
-          mkdir -p .vercel/output
-          cp -r "${{ inputs.output-dir }}"/* .vercel/output/
-          echo "Build output copied successfully"
-          ls -la .vercel/output/
-        else
-          echo "Error: Output directory ${{ inputs.output-dir }} does not exist"
-          exit 1
-        fi
-
     - name: Start deployment
       id: start-deployment
       uses: bobheadxi/deployments@v1
@@ -95,6 +80,8 @@ runs:
       id: deploy
       shell: bash
       run: |
+        cp -r "${{ inputs.output-dir }}"/* .vercel/output/
+
         # Build deployment command
         DEPLOY_CMD="vercel deploy --prebuilt --token=${{ inputs.vercel-token }}"
 
