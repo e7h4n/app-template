@@ -41,3 +41,4 @@ runs:
         include-hidden-files: true
         path: .vercel/output
         retention-days: 7
+        overwrite: true

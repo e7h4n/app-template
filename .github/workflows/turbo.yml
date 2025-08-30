@@ -53,9 +53,10 @@ jobs:
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: turbo-build-${{ github.run_id }}-cli
+          name: turbo-build-${{ github.sha }}-cli
           path: turbo/apps/cli/dist
           retention-days: 7
+          overwrite: true
 
   build-web:
     runs-on: ubuntu-latest
@@ -69,7 +70,7 @@ jobs:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ vars.VERCEL_TEAM_ID }}
           vercel-project-id: ${{ vars.VERCEL_PROJECT_ID_WEB }}
-          artifact-name: turbo-build-${{ github.run_id }}-web
+          artifact-name: turbo-build-${{ github.sha }}-web
 
   build-docs:
     runs-on: ubuntu-latest
@@ -83,7 +84,7 @@ jobs:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ vars.VERCEL_TEAM_ID }}
           vercel-project-id: ${{ vars.VERCEL_PROJECT_ID_DOCS }}
-          artifact-name: turbo-build-${{ github.run_id }}-docs
+          artifact-name: turbo-build-${{ github.sha }}-docs
 
   e2e:
     runs-on: ${{ matrix.os }}
@@ -103,7 +104,7 @@ jobs:
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: turbo-build-${{ github.run_id }}-cli
+          name: turbo-build-${{ github.sha }}-cli
           path: turbo/apps/cli/dist
 
       - name: Install CLI globally
@@ -146,7 +147,7 @@ jobs:
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: turbo-build-${{ github.run_id }}-web
+          name: turbo-build-${{ github.sha }}-web
           path: .vercel/output
 
       - name: Deploy Web to Vercel
@@ -176,7 +177,7 @@ jobs:
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: turbo-build-${{ github.run_id }}-docs
+          name: turbo-build-${{ github.sha }}-docs
           path: .vercel/output
 
       - name: Deploy Docs to Vercel
