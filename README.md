@@ -29,11 +29,7 @@ Here's what I need you to do:
    - Delete turbo/apps/cli directory
    - Remove CLI-related jobs from .github/workflows/turbo.yml and .github/workflows/release-please.yml
    - Remove CLI-related configurations from lefthook.yml and other config files
-9. Install dependencies and initialize git repository:
-   ```bash
-   cd turbo && pnpm install
-   cd .. && git add . && git commit -m "init commit" && git push
-   ```
+9. Install dependencies and initialize git repository: `(cd turbo && pnpm install) && (git add . && git commit -m "init commit" && git push)
 10. Guide me through any additional setup steps
 
 Required GitHub repository secrets (use `gh secret set`):
